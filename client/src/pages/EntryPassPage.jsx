@@ -45,6 +45,18 @@ export function EntryPassPage({ user, onOpenAuth }) {
     }
   }, [user]);
 
+  // Lock background body scroll when ticket modal is open
+  useEffect(() => {
+    if (selectedPassForQR) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [selectedPassForQR]);
+
   // Load user passes
   const fetchMyPasses = async () => {
     if (user) {
@@ -448,82 +460,105 @@ export function EntryPassPage({ user, onOpenAuth }) {
           </div>
         )}
 
-        {/* DARK MODE BOARDING PASS STYLE STUB DIALOG FOR MY PASSES */}
+        {/* BOARDING PASS STYLE STUB DIALOG FOR MY PASSES */}
         {selectedPassForQR && (
-          <div className="modal fade show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.85)', zIndex: 1050 }}>
-            <div className="modal-dialog modal-dialog-centered">
-              <div className="modal-content text-white rounded-4 shadow-2xl overflow-hidden" style={{ backgroundColor: '#0d0d0f', border: '1px solid #2d2d32', maxHeight: '90vh' }}>
+          <div
+            className="modal fade show d-block overflow-y-auto"
+            style={{
+              backgroundColor: "rgba(0, 0, 0, 0.88)",
+              backdropFilter: "blur(8px)",
+              zIndex: 1060,
+              position: "fixed",
+              top: 0,
+              left: 0,
+              width: "100vw",
+              height: "100vh",
+              overflowY: "auto",
+            }}
+            onClick={(e) => {
+              if (e.target === e.currentTarget) setSelectedPassForQR(null);
+            }}
+          >
+            <div className="modal-dialog modal-dialog-centered py-4">
+              <div
+                className="modal-content rounded-4 shadow-2xl overflow-hidden epass-modal-content"
+                style={{
+                  maxHeight: "90vh",
+                  display: "flex",
+                  flexDirection: "column",
+                }}
+              >
                 
-                <div className="modal-header border-0 bg-black px-4 py-3">
-                  <h6 className="modal-title font-serif fw-bold text-warning d-flex align-items-center gap-2">
+                <div className="modal-header px-4 py-3 epass-modal-header d-flex align-items-center justify-content-between flex-shrink-0">
+                  <h6 className="modal-title font-serif fw-bold text-warning d-flex align-items-center gap-2 mb-0">
                     <QrCode size={18} /> Shri Mahakal E-Pass Ticket Stub
                   </h6>
                   <button
                     type="button"
-                    className="btn-close btn-close-white"
+                    className="btn-close"
                     onClick={() => setSelectedPassForQR(null)}
                   ></button>
                 </div>
 
-                <div className="modal-body p-4">
+                <div className="modal-body p-4 p-md-4.5 overflow-auto flex-grow-1 epass-modal-body">
                   
-                  {/* DARK MODE PHYSICAL BOARDING PASS CARD */}
-                  <div className="bg-black text-white rounded-4 shadow-2xl overflow-hidden" style={{ border: "1px solid rgba(245, 158, 11, 0.4)", backgroundColor: "#0a0a0c" }}>
+                  {/* PHYSICAL BOARDING PASS CARD */}
+                  <div className="epass-ticket-card rounded-4 shadow-2xl overflow-hidden">
                     
-                    <div className="bg-warning py-1.5 px-3 d-flex justify-content-between align-items-center text-dark fw-bold" style={{ fontSize: "0.72rem" }}>
+                    <div className="bg-warning py-2.5 px-4 d-flex justify-content-between align-items-center text-dark fw-bold" style={{ fontSize: "0.78rem" }}>
                       <span>SHRI MAHAKALESHWAR TEMPLE TRUST</span>
                       <span className="font-monospace">{selectedPassForQR.passId}</span>
                     </div>
 
-                    <div className="p-3" style={{ backgroundColor: "#111114" }}>
-                      <div className="d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom border-secondary border-opacity-20">
+                    <div className="p-4.5 p-md-5 epass-ticket-body">
+                      <div className="d-flex justify-content-between align-items-center mb-4 pb-3.5 border-bottom border-secondary border-opacity-25">
                         <div>
-                          <span className="text-warning d-block text-uppercase fw-bold" style={{ fontSize: "0.62rem" }}>ENTRY GATE</span>
-                          <h4 className="fw-black text-white font-serif mb-0">{selectedPassForQR.gateName}</h4>
+                          <span className="text-warning d-block text-uppercase fw-bold mb-1" style={{ fontSize: "0.68rem" }}>ENTRY GATE</span>
+                          <h4 className="fw-black epass-ticket-title font-serif mb-1">{selectedPassForQR.gateName}</h4>
                         </div>
-                        <span className="badge bg-warning text-dark font-monospace fw-bold px-2 py-1 small">
+                        <span className="badge bg-warning text-dark font-monospace fw-bold px-3 py-1.5 small shadow-sm">
                           Gate #{selectedPassForQR.gateNumber}
                         </span>
                       </div>
 
-                      <div className="row g-2 text-sm mb-2">
-                        <div className="col-6">
-                          <span className="text-gray-400 d-block text-uppercase fw-bold" style={{ fontSize: "0.62rem" }}>PRIMARY DEVOTEE</span>
-                          <strong className="text-white d-block text-truncate">{selectedPassForQR.primaryDevoteeName}</strong>
+                      <div className="row g-3 text-sm mb-3">
+                        <div className="col-6 mb-2">
+                          <span className="epass-ticket-label d-block text-uppercase fw-bold mb-1" style={{ fontSize: "0.68rem" }}>PRIMARY DEVOTEE</span>
+                          <strong className="epass-ticket-title d-block text-truncate fs-6">{selectedPassForQR.primaryDevoteeName}</strong>
                         </div>
-                        <div className="col-6">
-                          <span className="text-gray-400 d-block text-uppercase fw-bold" style={{ fontSize: "0.62rem" }}>TOTAL DEVOTEES</span>
-                          <strong className="text-warning d-block">{selectedPassForQR.numberOfPersons} Person(s)</strong>
+                        <div className="col-6 mb-2">
+                          <span className="epass-ticket-label d-block text-uppercase fw-bold mb-1" style={{ fontSize: "0.68rem" }}>TOTAL DEVOTEES</span>
+                          <strong className="text-warning d-block fs-6">{selectedPassForQR.numberOfPersons} Person(s)</strong>
                         </div>
 
                         <div className="col-6">
-                          <span className="text-gray-400 d-block text-uppercase fw-bold" style={{ fontSize: "0.62rem" }}>ISSUE TIME</span>
-                          <span className="text-warning d-block font-monospace fw-semibold" style={{ fontSize: "0.74rem" }}>
+                          <span className="epass-ticket-label d-block text-uppercase fw-bold mb-1" style={{ fontSize: "0.68rem" }}>ISSUE TIME</span>
+                          <span className="text-warning d-block font-monospace fw-semibold mb-0.5" style={{ fontSize: "0.78rem" }}>
                             {selectedPassForQR.bookingDate || new Date(selectedPassForQR.entryTime || selectedPassForQR.createdAt).toISOString().substring(0, 10)}
                           </span>
-                          <strong className="text-white font-monospace">{new Date(selectedPassForQR.entryTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</strong>
+                          <strong className="epass-ticket-title font-monospace fs-6">{new Date(selectedPassForQR.entryTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</strong>
                         </div>
                         <div className="col-6">
-                          <span className="text-gray-400 d-block text-uppercase fw-bold" style={{ fontSize: "0.62rem" }}>EXPIRE TIME</span>
-                          <span className="text-warning d-block font-monospace fw-semibold" style={{ fontSize: "0.74rem" }}>
+                          <span className="epass-ticket-label d-block text-uppercase fw-bold mb-1" style={{ fontSize: "0.68rem" }}>EXPIRE TIME</span>
+                          <span className="text-warning d-block font-monospace fw-semibold mb-0.5" style={{ fontSize: "0.78rem" }}>
                             {new Date(selectedPassForQR.expiryTime).toISOString().substring(0, 10)}
                           </span>
-                          <strong className="text-danger font-monospace">{new Date(selectedPassForQR.expiryTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</strong>
+                          <strong className="text-danger font-monospace fs-6">{new Date(selectedPassForQR.expiryTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</strong>
                         </div>
                       </div>
                     </div>
 
                     {/* PERFORATED DOTTED SEPARATOR */}
-                    <div className="position-relative bg-black py-1.5 px-3">
+                    <div className="position-relative epass-ticket-stub py-2 px-4">
                       <div className="w-100 border-top border-dashed border-warning opacity-40"></div>
                     </div>
 
                     {/* QR CODE SCANNER STUB */}
-                    <div className="p-3 bg-black text-center">
-                      <div className="p-2 bg-white rounded-3 d-inline-block">
-                        <QRCodeDisplay value={selectedPassForQR.qrPayload || selectedPassForQR.passId} size={140} className="mx-auto" />
+                    <div className="p-4.5 p-md-5 epass-ticket-stub text-center">
+                      <div className="p-3 bg-white rounded-4 d-inline-block shadow-md mb-2">
+                        <QRCodeDisplay value={selectedPassForQR.qrPayload || selectedPassForQR.passId} size={145} className="mx-auto" />
                       </div>
-                      <div className="text-gray-400 font-monospace d-block mt-2" style={{ fontSize: "0.65rem" }}>
+                      <div className="epass-ticket-label font-monospace d-block mt-2 fw-semibold" style={{ fontSize: "0.72rem" }}>
                         GATE #{selectedPassForQR.gateNumber} SCANNER VERIFIED
                       </div>
                     </div>

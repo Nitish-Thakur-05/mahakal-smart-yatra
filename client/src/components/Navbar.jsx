@@ -184,7 +184,7 @@ export function Navbar({ onOpenAuth, onOpenPassPortal, user, onLogout }) {
               className={`h5 mb-0 text-white fw-bold ${styles.playfairFont}`}
               style={{ whiteSpace: "nowrap" }}
             >
-              MAHAKAL<span className="text-warning">360</span>
+              MAHAKAL <span className="text-warning">SMART YATRA</span>
             </span>
             <small
               className="d-block text-warning text-uppercase"
@@ -392,41 +392,8 @@ export function Navbar({ onOpenAuth, onOpenPassPortal, user, onLogout }) {
                   className="d-flex align-items-center gap-2 flex-nowrap"
                   style={{ whiteSpace: "nowrap" }}
                 >
-                  {/* User Profile Badge Button */}
-                  <Link
-                    to="/profile"
-                    onClick={() => setMobileOpen(false)}
-                    className="btn btn-outline-warning btn-sm rounded-pill px-3 py-1.5 d-inline-flex align-items-center justify-content-center gap-2 font-semibold text-decoration-none shadow-sm"
-                    style={{
-                      fontSize: "0.82rem",
-                      height: "36px",
-                      whiteSpace: "nowrap",
-                    }}
-                    title="View Profile & Booked Passes"
-                  >
-                    <User size={15} className="text-warning flex-shrink-0" />
-                    <span className="lh-1">{user.name}</span>
-                  </Link>
-
-                  {/* Hotel Dashboard for Hotel Partners */}
-                  {user.role === "hotel" && (
-                    <Link
-                      to="/hotel-dashboard"
-                      onClick={() => setMobileOpen(false)}
-                      className="btn btn-warning btn-sm text-dark rounded-pill px-3 py-1.5 d-inline-flex align-items-center justify-content-center gap-2 font-bold text-decoration-none shadow-sm"
-                      style={{
-                        fontSize: "0.82rem",
-                        height: "36px",
-                        whiteSpace: "nowrap",
-                      }}
-                    >
-                      <Building size={15} className="flex-shrink-0" />
-                      <span className="lh-1">Hotel Dashboard</span>
-                    </Link>
-                  )}
-
-                  {/* Admin Panel Button for Officials */}
-                  {(user.role === "official" || user.role === "admin") && (
+                  {/* For Admin Users: Show ONLY Admin Panel button (No Profile button) */}
+                  {user.role === "official" || user.role === "admin" ? (
                     <Link
                       to="/admin"
                       onClick={() => setMobileOpen(false)}
@@ -436,11 +403,49 @@ export function Navbar({ onOpenAuth, onOpenPassPortal, user, onLogout }) {
                         height: "36px",
                         whiteSpace: "nowrap",
                       }}
-                      title="Mahakal Administrator Panel"
+                      title="Mahakal Admin Panel"
                     >
                       <ShieldCheck size={15} className="flex-shrink-0" />
                       <span className="lh-1">Admin Panel</span>
                     </Link>
+                  ) : (
+                    <>
+                      {/* User Profile Badge Button for Devotees / Hotel Partners */}
+                      <Link
+                        to="/profile"
+                        onClick={() => setMobileOpen(false)}
+                        className="btn btn-outline-warning btn-sm rounded-pill px-3 py-1.5 d-inline-flex align-items-center justify-content-center gap-2 font-semibold text-decoration-none shadow-sm"
+                        style={{
+                          fontSize: "0.82rem",
+                          height: "36px",
+                          whiteSpace: "nowrap",
+                        }}
+                        title="View Profile & Booked Passes"
+                      >
+                        <User
+                          size={15}
+                          className="text-warning flex-shrink-0"
+                        />
+                        <span className="lh-1">{user.name}</span>
+                      </Link>
+
+                      {/* Hotel Dashboard for Hotel Partners */}
+                      {user.role === "hotel" && (
+                        <Link
+                          to="/hotel-dashboard"
+                          onClick={() => setMobileOpen(false)}
+                          className="btn btn-warning btn-sm text-dark rounded-pill px-3 py-1.5 d-inline-flex align-items-center justify-content-center gap-2 font-bold text-decoration-none shadow-sm"
+                          style={{
+                            fontSize: "0.82rem",
+                            height: "36px",
+                            whiteSpace: "nowrap",
+                          }}
+                        >
+                          <Building size={15} className="flex-shrink-0" />
+                          <span className="lh-1">Hotel Dashboard</span>
+                        </Link>
+                      )}
+                    </>
                   )}
 
                   {/* Single Sign Out Button */}

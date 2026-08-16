@@ -73,7 +73,8 @@ export function AIPlanner() {
 
     if (!planObj || typeof planObj !== "object") return null;
 
-    const title = planObj.title || planObj.name || "Custom Ujjain Pilgrimage Plan";
+    const title =
+      planObj.title || planObj.name || "Custom Ujjain Pilgrimage Plan";
     const subtitle =
       planObj.subtitle ||
       planObj.summary ||
@@ -83,8 +84,8 @@ export function AIPlanner() {
     let days = Array.isArray(planObj.days)
       ? planObj.days
       : Array.isArray(planObj.itinerary)
-      ? planObj.itinerary
-      : null;
+        ? planObj.itinerary
+        : null;
 
     if (!days || !Array.isArray(days) || days.length === 0) {
       return null;
@@ -98,10 +99,10 @@ export function AIPlanner() {
       const rawSchedule = Array.isArray(d.schedule)
         ? d.schedule
         : Array.isArray(d.activities)
-        ? d.activities
-        : Array.isArray(d.items)
-        ? d.items
-        : [];
+          ? d.activities
+          : Array.isArray(d.items)
+            ? d.items
+            : [];
 
       const schedule = rawSchedule.map((item) => ({
         time: item.time || "Flexible",
@@ -168,18 +169,18 @@ export function AIPlanner() {
           return;
         } else {
           console.warn(
-            "n8n returned malformed itinerary data structure. Falling back to backend endpoint."
+            "n8n returned malformed itinerary data structure. Falling back to backend endpoint.",
           );
         }
       } catch (err) {
         console.warn(
           "n8n AI itinerary webhook primary call failed. Activating fallback 1 (backend endpoint):",
-          err.message
+          err.message,
         );
       }
     } else {
       console.info(
-        "VITE_N8N_ITINERARY_WEBHOOK_URL is not set or using placeholder. Proceeding to fallback 1."
+        "VITE_N8N_ITINERARY_WEBHOOK_URL is not set or using placeholder. Proceeding to fallback 1.",
       );
     }
 
@@ -211,7 +212,7 @@ export function AIPlanner() {
     } catch (err) {
       console.warn(
         "Backend itinerary API endpoint call failed. Activating fallback 2 (client dynamic generator):",
-        err.message
+        err.message,
       );
     }
 
@@ -221,7 +222,7 @@ export function AIPlanner() {
       travelPace,
       groupType,
       interests,
-      customNotes
+      customNotes,
     );
     setPlan(clientPlan);
     setPlanSource("dynamic-ai");
@@ -252,7 +253,10 @@ export function AIPlanner() {
   };
 
   return (
-    <div className="bg-black min-vh-100 text-white pb-5" style={{ paddingTop: '110px' }}>
+    <div
+      className="bg-black min-vh-100 text-white pb-5"
+      style={{ paddingTop: "110px" }}
+    >
       <div className="container py-4">
         {/* Header */}
         <div className="text-center mb-5">
@@ -477,7 +481,10 @@ export function AIPlanner() {
                             <div className="d-flex align-items-center justify-content-between mb-3 gap-2 flex-wrap">
                               <span
                                 className="badge bg-black text-warning border border-warning border-opacity-30 rounded-pill px-3 py-1.5 font-monospace fw-bold small d-inline-flex align-items-center gap-2 text-nowrap"
-                                style={{ fontSize: "0.8rem", whiteSpace: "nowrap" }}
+                                style={{
+                                  fontSize: "0.8rem",
+                                  whiteSpace: "nowrap",
+                                }}
                               >
                                 <Clock
                                   size={14}
@@ -488,10 +495,15 @@ export function AIPlanner() {
 
                               <span
                                 className="badge bg-dark text-secondary border border-secondary border-opacity-30 rounded-pill px-3 py-1.5 small font-semibold d-inline-flex align-items-center gap-2 text-nowrap"
-                                style={{ fontSize: "0.75rem", whiteSpace: "nowrap" }}
+                                style={{
+                                  fontSize: "0.75rem",
+                                  whiteSpace: "nowrap",
+                                }}
                               >
                                 {getCategoryIcon(slot.category)}
-                                <span className="ms-1">{slot.category || "Activity"}</span>
+                                <span className="ms-1">
+                                  {slot.category || "Activity"}
+                                </span>
                               </span>
                             </div>
 

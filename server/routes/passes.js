@@ -1,5 +1,6 @@
 const express = require("express");
 const router = express.Router();
+const mongoose = require("mongoose");
 const EntryPass = require("../models/EntryPass");
 const { authenticateToken } = require("../middleware/auth");
 const { invalidateCrowdCache } = require("../services/crowdDataset");
@@ -35,10 +36,17 @@ function calculatePassValidityMins(distanceMeters, crowdLevel) {
  */
 async function getLowestCrowdGateAndMetrics() {
   const now = new Date();
-  const activePasses = await EntryPass.find({
-    status: "active",
-    expiryTime: { $gt: now },
-  });
+  let activePasses = [];
+  if (mongoose.connection.readyState === 1) {
+    try {
+      activePasses = await EntryPass.find({
+        status: "active",
+        expiryTime: { $gt: now },
+      });
+    } catch (e) {
+      activePasses = [];
+    }
+  }
 
   const gateActiveCounts = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
   let totalActiveCrowd = 0;
@@ -306,7 +314,14 @@ router.post("/book", authenticateToken, async (req, res) => {
 router.get("/my-passes", authenticateToken, async (req, res) => {
   try {
     const userId = req.user.userId;
-    const passes = await EntryPass.find({ userId }).sort({ createdAt: -1 });
+    let passes = [];
+    if (mongoose.connection.readyState === 1) {
+      try {
+        passes = await EntryPass.find({ userId }).sort({ createdAt: -1 });
+      } catch (err) {
+        passes = [];
+      }
+    }
 
     // Auto-update expired passes
     const now = new Date();
@@ -362,7 +377,14 @@ router.get("/gates", async (req, res) => {
 // GET /api/passes/analytics - Aggregate visitor metrics: Hourly, Daily, Festival, Monthly
 router.get("/analytics", async (req, res) => {
   try {
-    const passes = await EntryPass.find({});
+    let passes = [];
+    if (mongoose.connection.readyState === 1) {
+      try {
+        passes = await EntryPass.find({});
+      } catch (err) {
+        passes = [];
+      }
+    }
 
     const hourlyData = Array(24).fill(0);
     const dayOfWeekData = {
@@ -560,10 +582,17 @@ router.get('/inventory-analytics', async (req, res) => {
     }
 
     // Fetch passes created/active within the timeframe
-    const passes = await EntryPass.find({
-      createdAt: { $gte: startDate, $lte: endDate },
-      status: { $ne: 'cancelled' }
-    });
+    let passes = [];
+    if (mongoose.connection.readyState === 1) {
+      try {
+        passes = await EntryPass.find({
+          createdAt: { $gte: startDate, $lte: endDate },
+          status: { $ne: 'cancelled' }
+        });
+      } catch (err) {
+        passes = [];
+      }
+    }
 
     // 1. VIP Packages Dynamic Analytics
     const vipPackageConfigs = [

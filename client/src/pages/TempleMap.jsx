@@ -529,18 +529,18 @@ export function TempleMap() {
                 <div className="row g-3">
                   {KEY_TEMPLE_GATES.map((gate) => (
                     <div key={gate.id} className="col-12 col-md-6 col-lg-4">
-                      <div className="p-3.5 bg-dark rounded-4 border border-warning border-opacity-20 hover-border-warning transition-all h-100 d-flex flex-column justify-content-between">
+                      <div className="p-4 p-lg-4.5 bg-dark rounded-4 border border-warning border-opacity-25 hover-border-warning transition-all h-100 d-flex flex-column justify-content-between shadow-md">
                         <div>
-                          <span className="badge bg-secondary bg-opacity-20 text-light border border-secondary border-opacity-40 rounded-pill px-2.5 py-1 mb-2 font-semibold fs-7">
+                          <span className="badge bg-secondary bg-opacity-20 text-light border border-secondary border-opacity-40 rounded-pill px-3 py-1 mb-2.5 font-semibold fs-7">
                             {gate.category}
                           </span>
-                          <h5 className="fw-bold text-white mb-1">
+                          <h5 className="fw-bold text-white mb-1.5">
                             {gate.name}
                           </h5>
-                          <div className="text-warning small mb-2">
+                          <div className="text-warning small mb-2.5 font-semibold">
                             {gate.nameHi}
                           </div>
-                          <p className="text-secondary small mb-3">
+                          <p className="text-secondary small mb-3.5 leading-relaxed">
                             {gate.desc}
                           </p>
                         </div>
@@ -548,7 +548,7 @@ export function TempleMap() {
                           href={gate.googleMapsUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="btn btn-outline-warning btn-sm w-100 rounded-pill d-flex align-items-center justify-content-center gap-1.5 font-semibold text-decoration-none"
+                          className="btn btn-outline-warning btn-sm w-100 rounded-pill d-flex align-items-center justify-content-center gap-1.5 font-semibold text-decoration-none py-2"
                         >
                           <Navigation size={14} /> Open Gate GPS Pin
                         </a>
@@ -572,13 +572,13 @@ export function TempleMap() {
           <div className="row g-4">
             {/* Ujjain Junction Station */}
             <div className="col-12 col-md-4">
-              <div className="p-4 bg-dark rounded-4 border border-warning border-opacity-25 hover-border-warning transition-all h-100 shadow-xl">
-                <div className="d-flex align-items-center gap-3 mb-3">
-                  <div className="rounded-circle p-3 bg-warning bg-opacity-15 text-warning border border-warning border-opacity-30">
+              <div className="p-4.5 p-lg-5 bg-dark rounded-4 border border-warning border-opacity-25 hover-border-warning transition-all h-100 shadow-xl">
+                <div className="d-flex align-items-center gap-3 mb-3.5">
+                  <div className="rounded-circle p-3 bg-warning bg-opacity-15 text-warning border border-warning border-opacity-30 flex-shrink-0">
                     <Train size={24} />
                   </div>
                   <div>
-                    <h5 className="fw-bold text-white mb-0">
+                    <h5 className="fw-bold text-white mb-1">
                       Ujjain Junction (UJN)
                     </h5>
                     <span className="text-warning small font-bold">
@@ -586,11 +586,11 @@ export function TempleMap() {
                     </span>
                   </div>
                 </div>
-                <p className="text-secondary small mb-3">
+                <p className="text-secondary small mb-3.5 leading-relaxed">
                   Direct trains connect from Delhi, Mumbai, Ahmedabad, Jaipur,
                   Bhopal, and Kolkata.
                 </p>
-                <div className="p-2.5 bg-black bg-opacity-60 rounded-3 border border-secondary border-opacity-20 text-light small">
+                <div className="p-3 bg-black bg-opacity-60 rounded-3 border border-secondary border-opacity-25 text-light small">
                   <strong>Estimated Travel Time:</strong> 7 - 10 mins by
                   Auto-rickshaw (₹50-₹80 flat rate).
                 </div>
@@ -599,13 +599,13 @@ export function TempleMap() {
 
             {/* Indore Airport */}
             <div className="col-12 col-md-4">
-              <div className="p-4 bg-dark rounded-4 border border-warning border-opacity-25 hover-border-warning transition-all h-100 shadow-xl">
-                <div className="d-flex align-items-center gap-3 mb-3">
-                  <div className="rounded-circle p-3 bg-warning bg-opacity-15 text-warning border border-warning border-opacity-30">
+              <div className="p-4.5 p-lg-5 bg-dark rounded-4 border border-warning border-opacity-25 hover-border-warning transition-all h-100 shadow-xl">
+                <div className="d-flex align-items-center gap-3 mb-3.5">
+                  <div className="rounded-circle p-3 bg-warning bg-opacity-15 text-warning border border-warning border-opacity-30 flex-shrink-0">
                     <Plane size={24} />
                   </div>
                   <div>
-                    <h5 className="fw-bold text-white mb-0">
+                    <h5 className="fw-bold text-white mb-1">
                       Devi Ahilya Airport (IDR)
                     </h5>
                     <span className="text-warning small font-bold">
@@ -613,11 +613,11 @@ export function TempleMap() {
                     </span>
                   </div>
                 </div>
-                <p className="text-secondary small mb-3">
+                <p className="text-secondary small mb-3.5 leading-relaxed">
                   Nearest commercial airport with non-stop flights from all
                   major Indian metro cities.
                 </p>
-                <div className="p-2.5 bg-black bg-opacity-60 rounded-3 border border-secondary border-opacity-20 text-light small">
+                <div className="p-3 bg-black bg-opacity-60 rounded-3 border border-secondary border-opacity-25 text-light small">
                   <strong>Estimated Travel Time:</strong> 1 hr 15 mins via
                   4-lane Indore-Ujjain Highway.
                 </div>
@@ -626,13 +626,13 @@ export function TempleMap() {
 
             {/* Nanakheda Bus Stand */}
             <div className="col-12 col-md-4">
-              <div className="p-4 bg-dark rounded-4 border border-warning border-opacity-25 hover-border-warning transition-all h-100 shadow-xl">
-                <div className="d-flex align-items-center gap-3 mb-3">
-                  <div className="rounded-circle p-3 bg-warning bg-opacity-15 text-warning border border-warning border-opacity-30">
+              <div className="p-4.5 p-lg-5 bg-dark rounded-4 border border-warning border-opacity-25 hover-border-warning transition-all h-100 shadow-xl">
+                <div className="d-flex align-items-center gap-3 mb-3.5">
+                  <div className="rounded-circle p-3 bg-warning bg-opacity-15 text-warning border border-warning border-opacity-30 flex-shrink-0">
                     <Car size={24} />
                   </div>
                   <div>
-                    <h5 className="fw-bold text-white mb-0">
+                    <h5 className="fw-bold text-white mb-1">
                       Nanakheda Bus Stand
                     </h5>
                     <span className="text-warning small font-bold">
@@ -640,11 +640,11 @@ export function TempleMap() {
                     </span>
                   </div>
                 </div>
-                <p className="text-secondary small mb-3">
+                <p className="text-secondary small mb-3.5 leading-relaxed">
                   Interstate AC sleeper bus terminal connecting MP, Rajasthan,
                   Gujarat, and Maharashtra.
                 </p>
-                <div className="p-2.5 bg-black bg-opacity-60 rounded-3 border border-secondary border-opacity-20 text-light small">
+                <div className="p-3 bg-black bg-opacity-60 rounded-3 border border-secondary border-opacity-25 text-light small">
                   <strong>Estimated Travel Time:</strong> 15 mins by City Bus or
                   E-Rickshaw shuttle.
                 </div>
@@ -698,35 +698,35 @@ export function TempleMap() {
           <div className="row g-4">
             {filteredLocations.map((gate) => (
               <div key={gate.id} className="col-12 col-md-6 col-lg-4">
-                <div className="p-4 bg-dark rounded-4 border border-warning border-opacity-20 hover-border-warning transition-all h-100 d-flex flex-column justify-content-between shadow-xl">
+                <div className="p-4.5 p-md-5 bg-dark rounded-4 border border-warning border-opacity-25 hover-border-warning transition-all h-100 d-flex flex-column justify-content-between shadow-xl">
                   <div>
-                    <div className="d-flex align-items-center justify-content-between mb-2">
-                      <span className="badge bg-secondary bg-opacity-20 text-light border border-secondary border-opacity-40 rounded-pill px-2.5 py-1 font-semibold fs-7">
+                    <div className="d-flex align-items-center justify-content-between mb-3">
+                      <span className="badge bg-secondary bg-opacity-20 text-light border border-secondary border-opacity-40 rounded-pill px-3 py-1 font-semibold fs-7">
                         {gate.category}
                       </span>
                       <span className="text-secondary small d-flex align-items-center gap-1">
-                        <MapPin size={13} className="text-warning" />{" "}
+                        <MapPin size={14} className="text-warning" />{" "}
                         {gate.distance}
                       </span>
                     </div>
 
-                    <h4 className="h5 fw-bold text-white mb-1">{gate.name}</h4>
-                    <div className="text-warning small mb-2 font-semibold">
+                    <h4 className="h5 fw-bold text-white mb-2">{gate.name}</h4>
+                    <div className="text-warning small mb-3 font-semibold fs-6">
                       {gate.nameHi}
                     </div>
-                    <div className="mb-3">
+                    <div className="mb-3.5">
                       <span
-                        className="badge bg-black text-warning border border-warning border-opacity-30 rounded-pill px-2.5 py-1 font-monospace d-inline-flex align-items-center gap-1.5"
-                        style={{ fontSize: "0.72rem" }}
+                        className="badge bg-black text-warning border border-warning border-opacity-35 rounded-pill px-3 py-1.5 font-monospace d-inline-flex align-items-center gap-1.5"
+                        style={{ fontSize: "0.75rem" }}
                       >
                         📍 GPS Pin: {gate.coordinates}
                       </span>
                     </div>
-                    <p className="text-secondary small mb-3">{gate.desc}</p>
+                    <p className="text-secondary small mb-4 leading-relaxed">{gate.desc}</p>
 
-                    <div className="mb-3">
+                    <div className="mb-4">
                       <h6
-                        className="text-light fs-7 font-bold text-uppercase mb-2"
+                        className="text-light fs-7 font-bold text-uppercase mb-2.5"
                         style={{ letterSpacing: "0.05em" }}
                       >
                         Key Facilities & Access:
@@ -735,11 +735,11 @@ export function TempleMap() {
                         {gate.features.map((feat, idx) => (
                           <li
                             key={idx}
-                            className="d-flex align-items-start gap-2 text-secondary small mb-1.5"
-                            style={{ fontSize: "0.8rem" }}
+                            className="d-flex align-items-start gap-2.5 text-secondary small mb-2"
+                            style={{ fontSize: "0.83rem" }}
                           >
                             <CheckCircle
-                              size={14}
+                              size={15}
                               className="text-warning flex-shrink-0 mt-0.5"
                             />
                             <span>{feat}</span>
@@ -749,12 +749,12 @@ export function TempleMap() {
                     </div>
                   </div>
 
-                  <div className="pt-3 border-top border-secondary border-opacity-20">
+                  <div className="pt-3.5 mt-2 border-top border-secondary border-opacity-25">
                     <a
                       href={gate.googleMapsUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="btn btn-outline-warning btn-sm w-100 rounded-pill d-flex align-items-center justify-content-center gap-2 font-bold text-decoration-none shadow-sm"
+                      className="btn btn-outline-warning btn-sm w-100 rounded-pill d-flex align-items-center justify-content-center gap-2 font-bold text-decoration-none shadow-sm py-2"
                     >
                       <Navigation size={14} /> Open Live GPS Pin
                       <ExternalLink size={12} />

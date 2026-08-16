@@ -15,7 +15,7 @@ const LOADING_STEPS = [
   "Fetching Live Aarti & Bhasma Aarti Timings...",
   "Loading Mahakal Lok Corridor & Dharamshala Stays...",
   "Syncing AI Pilgrimage Route Planner...",
-  "Welcome to Mahakal360 Portal!",
+  "Welcome to Mahakal Smart Yatra Portal!",
 ];
 
 // Handcrafted Traditional Trishul, Tripundra & Damru Emblem (Not Generic AI Icon)
@@ -197,7 +197,7 @@ export function AppSplashLoader({ onComplete }) {
             textShadow: isLight ? "none" : "0 2px 12px rgba(245, 158, 11, 0.4)",
           }}
         >
-          MAHAKAL360
+          MAHAKAL SMART YATRA
         </h1>
 
         {/* Subtitle */}

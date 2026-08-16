@@ -1,85 +1,91 @@
 const express = require('express');
 const router = express.Router();
+const mongoose = require('mongoose');
 const Announcement = require('../models/Announcement');
 const { requireAdmin } = require('../middleware/adminAuth');
 
 // GET /api/announcements (Public - Devotee Access)
 router.get('/', async (req, res) => {
-  try {
-    let announcements = await Announcement.find({}).sort({ createdAt: -1 });
-    
-    // Seed initial announcements if database table is empty
-    if (announcements.length === 0) {
-      const initialNotices = [
-        {
-          title: "Gate No. 1 (General Darshan Entry) Fully Operational",
-          category: "Gate Status",
-          status: "Open",
-          gateName: "Gate 1 - General Queue",
-          location: "Bada Ganesh Temple Side",
-          reason: "Normal Queue Flow",
-          description: "General Darshan queue is operating smoothly. Average waiting time is 25-30 minutes for Garbhagriha darshan.",
-          priority: "Normal"
-        },
-        {
-          title: "Gate No. 4 (Nandi Mandapam) Temporary Maintenance Closure",
-          category: "Gate Status",
-          status: "Closed",
-          gateName: "Gate 4 - Nandi Hall",
-          location: "Nandi Mandapam Entrance",
-          reason: "Routine sanitization, flower decoration & security review before evening Sandhya Aarti.",
-          description: "Gate 4 is closed from 2:00 PM to 4:30 PM. Pass holders are requested to divert to Gate No. 3.",
-          priority: "High"
-        },
-        {
-          title: "Gate No. 5 (VIP & Protocol Entry) Diverted",
-          category: "Gate Status",
-          status: "Diverted",
-          gateName: "Gate 5 - Protocol",
-          location: "VIP Car Pass Parking Side",
-          reason: "Heavy footfall of special festival buses.",
-          description: "Protocol visitors are requested to present original Photo ID and e-pass at Gate 3 counter.",
-          priority: "Normal"
-        },
-        {
-          title: "Bhasma Aarti Counter Advisory & Online Verification",
-          category: "Bhasma Aarti",
-          status: "Active",
-          gateName: "Bhasma Aarti Cell",
-          location: "Prashasnik Bhavan Counter 2",
-          reason: "Offline counter quota filled for today.",
-          description: "Bhasma Aarti offline counter token distribution is complete for today. Pilgrims with valid online e-passes can proceed for biometric verification between 10:00 PM to 1:00 AM.",
-          priority: "Urgent"
-        },
-        {
-          title: "Gate No. 2 (Siddhivinayak Entry) Fast-Track Clear",
-          category: "Gate Status",
-          status: "Open",
-          gateName: "Gate 2 - Siddhivinayak",
-          location: "Siddhivinayak Mandir Gate",
-          reason: "Normal Flow - 10 Min Wait",
-          description: "Gate No. 2 is open for senior citizens, quick darshan ticket holders, and families with small children.",
-          priority: "Normal"
-        },
-        {
-          title: "Shri Mahakal Lok Electric Golf Cart Service Operational",
-          category: "Crowd Advisory",
-          status: "Active",
-          gateName: "Mahakal Lok Corridor",
-          location: "Triveni Museum Plaza to Gate 1",
-          reason: "Complimentary Pilgrim Assistance",
-          description: "Complimentary battery-operated E-Carts are available continuously for elderly pilgrims, pregnant women, and differently-abled devotees.",
-          priority: "Normal"
-        }
-      ];
-
-      announcements = await Announcement.insertMany(initialNotices);
+  const initialNotices = [
+    {
+      title: "Gate No. 1 (General Darshan Entry) Fully Operational",
+      category: "Gate Status",
+      status: "Open",
+      gateName: "Gate 1 - General Queue",
+      location: "Bada Ganesh Temple Side",
+      reason: "Normal Queue Flow",
+      description: "General Darshan queue is operating smoothly. Average waiting time is 25-30 minutes for Garbhagriha darshan.",
+      priority: "Normal"
+    },
+    {
+      title: "Gate No. 4 (Nandi Mandapam) Temporary Maintenance Closure",
+      category: "Gate Status",
+      status: "Closed",
+      gateName: "Gate 4 - Nandi Hall",
+      location: "Nandi Mandapam Entrance",
+      reason: "Routine sanitization, flower decoration & security review before evening Sandhya Aarti.",
+      description: "Gate 4 is closed from 2:00 PM to 4:30 PM. Pass holders are requested to divert to Gate No. 3.",
+      priority: "High"
+    },
+    {
+      title: "Gate No. 5 (VIP & Protocol Entry) Diverted",
+      category: "Gate Status",
+      status: "Diverted",
+      gateName: "Gate 5 - Protocol",
+      location: "VIP Car Pass Parking Side",
+      reason: "Heavy footfall of special festival buses.",
+      description: "Protocol visitors are requested to present original Photo ID and e-pass at Gate 3 counter.",
+      priority: "Normal"
+    },
+    {
+      title: "Bhasma Aarti Counter Advisory & Online Verification",
+      category: "Bhasma Aarti",
+      status: "Active",
+      gateName: "Bhasma Aarti Cell",
+      location: "Prashasnik Bhavan Counter 2",
+      reason: "Offline counter quota filled for today.",
+      description: "Bhasma Aarti offline counter token distribution is complete for today. Pilgrims with valid online e-passes can proceed for biometric verification between 10:00 PM to 1:00 AM.",
+      priority: "Urgent"
+    },
+    {
+      title: "Gate No. 2 (Siddhivinayak Entry) Fast-Track Clear",
+      category: "Gate Status",
+      status: "Open",
+      gateName: "Gate 2 - Siddhivinayak",
+      location: "Siddhivinayak Mandir Gate",
+      reason: "Normal Flow - 10 Min Wait",
+      description: "Gate No. 2 is open for senior citizens, quick darshan ticket holders, and families with small children.",
+      priority: "Normal"
+    },
+    {
+      title: "Shri Mahakal Lok Electric Golf Cart Service Operational",
+      category: "Crowd Advisory",
+      status: "Active",
+      gateName: "Mahakal Lok Corridor",
+      location: "Triveni Museum Plaza to Gate 1",
+      reason: "Complimentary Pilgrim Assistance",
+      description: "Complimentary battery-operated E-Carts are available continuously for elderly pilgrims, pregnant women, and differently-abled devotees.",
+      priority: "Normal"
     }
+  ];
 
-    res.json(announcements);
+  let announcements = [];
+  try {
+    if (mongoose.connection.readyState === 1) {
+      announcements = await Announcement.find({}).sort({ createdAt: -1 });
+      if (announcements.length === 0) {
+        announcements = await Announcement.insertMany(initialNotices);
+      }
+    }
   } catch (err) {
-    res.status(500).json({ error: "Failed to fetch announcements." });
+    console.warn("Announcement DB query note:", err.message);
   }
+
+  if (!announcements || announcements.length === 0) {
+    announcements = initialNotices;
+  }
+
+  return res.json(announcements);
 });
 
 // Admin-protected routes

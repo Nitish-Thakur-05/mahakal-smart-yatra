@@ -74,7 +74,7 @@ export function ChatbotWidget() {
           message: messageContent,
           conversationHistory: messages,
         },
-        { headers }
+        { headers },
       );
 
       const replyContent =
@@ -116,11 +116,19 @@ export function ChatbotWidget() {
     <>
       {/* Floating Chat Button (Mahakalaswar Style) */}
       {!isOpen && (
-        <div className="position-fixed bottom-0 end-0 m-4 z-50" style={{ zIndex: 1050 }}>
+        <div
+          className="position-fixed bottom-0 end-0 m-4 z-50"
+          style={{ zIndex: 1050 }}
+        >
           <button
             onClick={() => setIsOpen(true)}
             className="btn btn-warning rounded-circle p-3 shadow-lg d-flex align-items-center justify-content-center transition-all hover-scale"
-            style={{ width: 58, height: 58, background: '#fbbf24', color: '#000' }}
+            style={{
+              width: 58,
+              height: 58,
+              background: "#fbbf24",
+              color: "#000",
+            }}
             title="Ask Mahakal AI Guide"
           >
             <MessageCircle size={28} className="fw-bold text-dark" />
@@ -130,15 +138,25 @@ export function ChatbotWidget() {
 
       {/* Chat Modal (Mahakalaswar Style) */}
       {isOpen && (
-        <div 
+        <div
           className="chatbot-modal-container position-fixed bottom-0 end-0 m-3 m-md-4 shadow-lg d-flex flex-column rounded-4 overflow-hidden border border-warning border-opacity-30"
-          style={{ width: '360px', height: '540px', backgroundColor: '#0a0a0a', zIndex: 1060 }}
+          style={{
+            width: "360px",
+            height: "540px",
+            backgroundColor: "#0a0a0a",
+            zIndex: 1060,
+          }}
         >
           {/* Header */}
           <div className="p-3 bg-warning text-dark d-flex align-items-center justify-content-between">
             <div>
-              <h5 className="mb-0 fw-bold fst-italic text-dark">Mahakal360 Guide</h5>
-              <small className="text-dark opacity-75 d-block" style={{ fontSize: '0.72rem' }}>
+              <h5 className="mb-0 fw-bold fst-italic text-dark">
+                Mahakal Smart Yatra Guide
+              </h5>
+              <small
+                className="text-dark opacity-75 d-block"
+                style={{ fontSize: "0.72rem" }}
+              >
                 Your AI companion for Mahakal Temple exploration
               </small>
             </div>
@@ -157,9 +175,15 @@ export function ChatbotWidget() {
                 <div className="rounded-circle bg-warning bg-opacity-10 p-3 mb-3 border border-warning border-opacity-25">
                   <MessageCircle className="text-warning" size={32} />
                 </div>
-                <h6 className="text-white fw-bold mb-2">Welcome to Mahakal360</h6>
-                <p className="text-secondary small mb-0 max-w-xs" style={{ fontSize: '0.8rem' }}>
-                  Ask me anything about Bhasma Aarti, Mahakal Lok corridor, temples, or stays in Ujjain.
+                <h6 className="text-white fw-bold mb-2">
+                  Welcome to Mahakal Smart Yatra
+                </h6>
+                <p
+                  className="text-secondary small mb-0 max-w-xs"
+                  style={{ fontSize: "0.8rem" }}
+                >
+                  Ask me anything about Bhasma Aarti, Mahakal Lok corridor,
+                  temples, or stays in Ujjain.
                 </p>
               </div>
             ) : (
@@ -176,12 +200,12 @@ export function ChatbotWidget() {
                           : "bg-dark text-light border border-secondary border-opacity-25"
                       }`}
                       style={{
-                        maxWidth: '85%',
-                        fontSize: '0.85rem',
-                        whiteSpace: 'pre-wrap',
-                        wordBreak: 'break-word',
-                        overflowWrap: 'anywhere',
-                        lineHeight: '1.45',
+                        maxWidth: "85%",
+                        fontSize: "0.85rem",
+                        whiteSpace: "pre-wrap",
+                        wordBreak: "break-word",
+                        overflowWrap: "anywhere",
+                        lineHeight: "1.45",
                       }}
                     >
                       {msg.content}
@@ -191,7 +215,10 @@ export function ChatbotWidget() {
                 {isLoading && (
                   <div className="d-flex justify-content-start">
                     <div className="p-2 px-3 bg-dark text-warning rounded-4 border border-secondary border-opacity-25 d-flex align-items-center gap-2 small">
-                      <Loader2 size={16} className="spinner-border spinner-border-sm" />
+                      <Loader2
+                        size={16}
+                        className="spinner-border spinner-border-sm"
+                      />
                       <span>Thinking...</span>
                     </div>
                   </div>
@@ -204,7 +231,10 @@ export function ChatbotWidget() {
           {/* Quick Prompts */}
           {messages.length === 0 && (
             <div className="p-3 bg-dark border-top border-secondary border-opacity-25">
-              <p className="text-warning text-uppercase fw-semibold tracking-wider mb-2" style={{ fontSize: '0.68rem' }}>
+              <p
+                className="text-warning text-uppercase fw-semibold tracking-wider mb-2"
+                style={{ fontSize: "0.68rem" }}
+              >
                 Quick Questions
               </p>
               <div className="d-flex flex-column gap-1.5">
@@ -214,7 +244,7 @@ export function ChatbotWidget() {
                     onClick={() => sendMessage(prompt)}
                     disabled={isLoading}
                     className="btn btn-outline-secondary btn-sm text-start text-light border-opacity-25 py-1.5 px-2.5 rounded-3 text-truncate"
-                    style={{ fontSize: '0.75rem' }}
+                    style={{ fontSize: "0.75rem" }}
                   >
                     {prompt}
                   </button>
@@ -238,7 +268,7 @@ export function ChatbotWidget() {
                 placeholder="Ask me anything..."
                 disabled={isLoading}
                 className="form-control bg-dark text-white border-secondary border-opacity-50 small"
-                style={{ fontSize: '0.85rem' }}
+                style={{ fontSize: "0.85rem" }}
               />
               <button
                 onClick={() => sendMessage()}

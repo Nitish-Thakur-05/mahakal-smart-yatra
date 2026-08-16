@@ -455,7 +455,10 @@ function HotelProfileView({ user, onEdit }) {
             <span className="badge bg-warning text-dark font-monospace fw-bold px-3 py-1.5 rounded-pill small mb-2 d-inline-block">
               MAHAKAL VERIFIED HOTEL PARTNER
             </span>
-            <h2 className={`text-white fw-bold mb-1 ${styles.playfairFont}`}>
+            <h2
+              className={`fw-bold mb-1 ${styles.playfairFont} hotel-overlay-title`}
+              style={{ color: "#ffffff", textShadow: "0 2px 10px rgba(0,0,0,0.9)" }}
+            >
               {user.hotelName || `${user.name}'s Hotel`}
             </h2>
             <div className="d-flex align-items-center gap-2 text-warning small font-monospace">
@@ -501,18 +504,22 @@ function HotelProfileView({ user, onEdit }) {
               <span className="text-warning font-monospace small fw-bold d-block mb-2 font-monospace">
                 CHECK-IN / CHECK-OUT
               </span>
-              <div className="d-flex align-items-center gap-2 text-light small mb-1">
-                <Clock size={16} className="text-warning" />
-                <span>
-                  <strong className="text-white">Check-in:</strong>{" "}
-                  {user.checkInTime || "12:00 PM"}
+              <div className="d-flex align-items-center gap-2 small mb-1">
+                <Clock size={16} className="text-warning flex-shrink-0" />
+                <span className="text-body">
+                  <strong className="fw-bold me-1 text-body">Check-in:</strong>
+                  <span className="fw-semibold text-body">
+                    {user.checkInTime || "12:00 PM"}
+                  </span>
                 </span>
               </div>
-              <div className="d-flex align-items-center gap-2 text-light small">
-                <Clock size={16} className="text-warning" />
-                <span>
-                  <strong className="text-white">Check-out:</strong>{" "}
-                  {user.checkOutTime || "11:00 AM"}
+              <div className="d-flex align-items-center gap-2 small">
+                <Clock size={16} className="text-warning flex-shrink-0" />
+                <span className="text-body">
+                  <strong className="fw-bold me-1 text-body">Check-out:</strong>
+                  <span className="fw-semibold text-body">
+                    {user.checkOutTime || "11:00 AM"}
+                  </span>
                 </span>
               </div>
             </div>
@@ -721,13 +728,7 @@ export function HotelPartnerDashboard({ user, onOpenAuth, onUpdateUser }) {
       style={{ paddingTop: "110px" }}
     >
       <div className="container py-4">
-        {/* Header */}
-        <div
-          className="p-4 p-md-5 rounded-4 border border-warning border-opacity-30 mb-5 shadow-lg"
-          style={{
-            background: "linear-gradient(135deg, #0d0d0d 0%, #1a1200 100%)",
-          }}
-        >
+        <div className="p-4 p-md-5 rounded-4 border border-warning border-opacity-30 mb-5 shadow-lg user-profile-header-card">
           <div className="d-flex flex-wrap align-items-center justify-content-between gap-3">
             <div>
               <span className="badge bg-warning text-dark font-monospace fw-bold px-3 py-1.5 rounded-pill small mb-2 d-inline-block">

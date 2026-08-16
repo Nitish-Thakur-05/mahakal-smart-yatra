@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
 import {
   User,
   Ticket,
@@ -262,6 +262,11 @@ function EditHotelProfileModal({ user, onSave, onClose, saving }) {
 }
 
 export function UserProfile({ user, onOpenAuth, onUpdateUser }) {
+  // Admin has ONLY the Admin Panel (/admin) and does not have a user profile page
+  if (user && (user.role === "official" || user.role === "admin")) {
+    return <Navigate to="/admin" replace />;
+  }
+
   const [bookings, setBookings] = useState([]);
   const [loadingBookings, setLoadingBookings] = useState(false);
   const [cancellingId, setCancellingId] = useState(null);
@@ -406,13 +411,7 @@ export function UserProfile({ user, onOpenAuth, onUpdateUser }) {
       style={{ paddingTop: "110px" }}
     >
       <div className="container py-4">
-        {/* Profile Header */}
-        <div
-          className="p-4 p-md-5 rounded-4 mb-5 border border-warning border-opacity-30 shadow-2xl user-profile-header-card"
-          style={{
-            background: "linear-gradient(135deg, #0d0d0d 0%, #1a1200 100%)",
-          }}
-        >
+        <div className="p-4 p-md-5 rounded-4 mb-5 border border-warning border-opacity-30 shadow-2xl user-profile-header-card">
           <div className="d-flex flex-wrap align-items-center justify-content-between gap-4">
             <div className="d-flex align-items-center gap-4">
               {/* Avatar */}
@@ -513,7 +512,8 @@ export function UserProfile({ user, onOpenAuth, onUpdateUser }) {
                     Hotel Property Profile
                   </span>
                   <h3
-                    className={`text-white fw-bold mb-1 ${styles.playfairFont}`}
+                    className={`fw-bold mb-1 ${styles.playfairFont} hotel-overlay-title`}
+                    style={{ color: "#ffffff", textShadow: "0 2px 10px rgba(0,0,0,0.9)" }}
                   >
                     {user.hotelName || `${user.name}'s Hotel`}
                   </h3>
@@ -559,18 +559,26 @@ export function UserProfile({ user, onOpenAuth, onUpdateUser }) {
                     <span className="text-warning fw-semibold small d-block mb-2">
                       Check-in / Check-out
                     </span>
-                    <div className="d-flex align-items-center gap-2 text-light small mb-1">
-                      <Clock size={16} className="text-warning" />
-                      <span>
-                        <strong className="text-white">Check-in:</strong>{" "}
-                        {user.checkInTime || "12:00 PM"}
+                    <div className="d-flex align-items-center gap-2 small mb-1">
+                      <Clock size={16} className="text-warning flex-shrink-0" />
+                      <span className="text-body">
+                        <strong className="fw-bold me-1 text-body">
+                          Check-in:
+                        </strong>
+                        <span className="fw-semibold text-body">
+                          {user.checkInTime || "12:00 PM"}
+                        </span>
                       </span>
                     </div>
-                    <div className="d-flex align-items-center gap-2 text-light small">
-                      <Clock size={16} className="text-warning" />
-                      <span>
-                        <strong className="text-white">Check-out:</strong>{" "}
-                        {user.checkOutTime || "11:00 AM"}
+                    <div className="d-flex align-items-center gap-2 small">
+                      <Clock size={16} className="text-warning flex-shrink-0" />
+                      <span className="text-body">
+                        <strong className="fw-bold me-1 text-body">
+                          Check-out:
+                        </strong>
+                        <span className="fw-semibold text-body">
+                          {user.checkOutTime || "11:00 AM"}
+                        </span>
                       </span>
                     </div>
                   </div>
@@ -678,18 +686,25 @@ export function UserProfile({ user, onOpenAuth, onUpdateUser }) {
               {/* BORDERLESS ULTRA-MINIMAL SEARCH & FILTER CONTROLS BAR */}
               <div className="p-3 mb-4">
                 <div className="row g-3 align-items-center">
-                  
                   {/* Search Input Box */}
                   <div className="col-lg-5">
                     <div className="position-relative">
-                      <Search size={16} className="position-absolute text-warning opacity-75" style={{ top: "11px", left: "14px" }} />
+                      <Search
+                        size={16}
+                        className="position-absolute text-warning opacity-75"
+                        style={{ top: "11px", left: "14px" }}
+                      />
                       <input
                         type="text"
                         className="form-control text-white border-0 rounded-3 py-2 ps-5"
                         placeholder="Search by Pass ID, Gate, Hotel or Name..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        style={{ backgroundColor: "#18181c", color: "#ffffff", fontSize: "0.85rem" }}
+                        style={{
+                          backgroundColor: "#18181c",
+                          color: "#ffffff",
+                          fontSize: "0.85rem",
+                        }}
                       />
                     </div>
                   </div>
@@ -698,10 +713,16 @@ export function UserProfile({ user, onOpenAuth, onUpdateUser }) {
                   <div className="col-lg-5 col-md-8">
                     <div className="d-flex flex-wrap gap-1.5">
                       {[
-                        { id: "all", label: `All (${entryPasses.length + vipTickets.length + bookings.length})` },
-                        { id: "passes", label: `E-Passes (${entryPasses.length})` },
+                        {
+                          id: "all",
+                          label: `All (${entryPasses.length + vipTickets.length + bookings.length})`,
+                        },
+                        {
+                          id: "passes",
+                          label: `E-Passes (${entryPasses.length})`,
+                        },
                         { id: "vip", label: `VIP (${vipTickets.length})` },
-                        { id: "hotels", label: `Hotels (${bookings.length})` }
+                        { id: "hotels", label: `Hotels (${bookings.length})` },
                       ].map((cat) => (
                         <button
                           key={cat.id}
@@ -726,15 +747,38 @@ export function UserProfile({ user, onOpenAuth, onUpdateUser }) {
                       className="form-select form-select-sm text-white border-0 rounded-3 py-2"
                       value={statusFilter}
                       onChange={(e) => setStatusFilter(e.target.value)}
-                      style={{ backgroundColor: "#18181c", color: "#ffffff", fontSize: "0.82rem" }}
+                      style={{
+                        backgroundColor: "#18181c",
+                        color: "#ffffff",
+                        fontSize: "0.82rem",
+                      }}
                     >
-                      <option value="all" style={{ backgroundColor: "#18181c", color: "#ffffff" }}>All Statuses</option>
-                      <option value="active" style={{ backgroundColor: "#18181c", color: "#ffffff" }}>Active / Confirmed</option>
-                      <option value="expired" style={{ backgroundColor: "#18181c", color: "#ffffff" }}>Expired</option>
-                      <option value="cancelled" style={{ backgroundColor: "#18181c", color: "#ffffff" }}>Cancelled</option>
+                      <option
+                        value="all"
+                        style={{ backgroundColor: "#18181c", color: "#ffffff" }}
+                      >
+                        All Statuses
+                      </option>
+                      <option
+                        value="active"
+                        style={{ backgroundColor: "#18181c", color: "#ffffff" }}
+                      >
+                        Active / Confirmed
+                      </option>
+                      <option
+                        value="expired"
+                        style={{ backgroundColor: "#18181c", color: "#ffffff" }}
+                      >
+                        Expired
+                      </option>
+                      <option
+                        value="cancelled"
+                        style={{ backgroundColor: "#18181c", color: "#ffffff" }}
+                      >
+                        Cancelled
+                      </option>
                     </select>
                   </div>
-
                 </div>
               </div>
 
@@ -752,7 +796,11 @@ export function UserProfile({ user, onOpenAuth, onUpdateUser }) {
                     date: p.entryTime,
                     expiry: p.expiryTime,
                     count: p.numberOfPersons,
-                    status: (p.status === "expired" || new Date() > new Date(p.expiryTime)) ? "expired" : (p.status || "active"),
+                    status:
+                      p.status === "expired" ||
+                      new Date() > new Date(p.expiryTime)
+                        ? "expired"
+                        : p.status || "active",
                     original: p,
                   })),
                   ...vipTickets.map((v) => ({
@@ -774,7 +822,10 @@ export function UserProfile({ user, onOpenAuth, onUpdateUser }) {
                     code: b._id.substring(b._id.length - 8).toUpperCase(),
                     type: "hotel",
                     category: "hotels",
-                    title: b.hotelId?.name || b.hotelName || "Hotel Stay Reservation",
+                    title:
+                      b.hotelId?.name ||
+                      b.hotelName ||
+                      "Hotel Stay Reservation",
                     subtitle: `Room: ${b.roomType} · Check-in: ${new Date(b.checkInDate).toLocaleDateString()}`,
                     primaryName: b.userName || user?.name,
                     date: b.checkInDate,
@@ -785,11 +836,25 @@ export function UserProfile({ user, onOpenAuth, onUpdateUser }) {
                 ];
 
                 const filtered = allItems.filter((item) => {
-                  if (categoryFilter !== "all" && item.category !== categoryFilter) return false;
+                  if (
+                    categoryFilter !== "all" &&
+                    item.category !== categoryFilter
+                  )
+                    return false;
                   if (statusFilter !== "all") {
-                    if (statusFilter === "active" && item.status !== "active" && item.status !== "confirmed") return false;
-                    if (statusFilter === "expired" && item.status !== "expired") return false;
-                    if (statusFilter === "cancelled" && item.status !== "cancelled") return false;
+                    if (
+                      statusFilter === "active" &&
+                      item.status !== "active" &&
+                      item.status !== "confirmed"
+                    )
+                      return false;
+                    if (statusFilter === "expired" && item.status !== "expired")
+                      return false;
+                    if (
+                      statusFilter === "cancelled" &&
+                      item.status !== "cancelled"
+                    )
+                      return false;
                   }
                   if (searchQuery.trim()) {
                     const q = searchQuery.toLowerCase();
@@ -805,10 +870,17 @@ export function UserProfile({ user, onOpenAuth, onUpdateUser }) {
                 if (filtered.length === 0) {
                   return (
                     <div className="p-5 bg-dark rounded-4 border border-secondary border-opacity-25 text-center my-3">
-                      <Ticket size={42} className="text-warning opacity-40 mb-2" />
-                      <h6 className="text-warning fw-bold mb-1">No Reservations Found</h6>
+                      <Ticket
+                        size={42}
+                        className="text-warning opacity-40 mb-2"
+                      />
+                      <h6 className="text-warning fw-bold mb-1">
+                        No Reservations Found
+                      </h6>
                       <p className="text-secondary small mb-3">
-                        {searchQuery || categoryFilter !== "all" || statusFilter !== "all"
+                        {searchQuery ||
+                        categoryFilter !== "all" ||
+                        statusFilter !== "all"
                           ? "No passes or bookings match your search query or filter selection."
                           : "You have not booked any Mahakal E-Passes, VIP tickets, or Hotel stays yet."}
                       </p>
@@ -835,32 +907,83 @@ export function UserProfile({ user, onOpenAuth, onUpdateUser }) {
 
                       return (
                         <div key={item.id} className="col-md-6">
-                          <div className={`p-4 bg-dark rounded-4 border ${isExpired ? "border-danger border-opacity-40" : isCancelled ? "border-secondary" : "border-warning border-opacity-40"} shadow-xl position-relative overflow-hidden h-100 d-flex flex-column justify-content-between`}>
-                            
+                          <div
+                            className={`p-4 bg-dark rounded-4 border ${isExpired ? "border-danger border-opacity-40" : isCancelled ? "border-secondary" : "border-warning border-opacity-40"} shadow-xl position-relative overflow-hidden h-100 d-flex flex-column justify-content-between`}
+                          >
                             <div>
                               <div className="d-flex align-items-center justify-content-between mb-3 border-bottom border-secondary border-opacity-20 pb-2">
                                 <div className="d-flex align-items-center gap-2">
-                                  {item.type === "epass" && <QrCode size={18} className="text-warning" />}
-                                  {item.type === "vip" && <Crown size={18} className="text-warning" />}
-                                  {item.type === "hotel" && <Building size={18} className="text-warning" />}
-                                  <span className="text-warning fw-bold font-monospace">{item.code}</span>
+                                  {item.type === "epass" && (
+                                    <QrCode
+                                      size={18}
+                                      className="text-warning"
+                                    />
+                                  )}
+                                  {item.type === "vip" && (
+                                    <Crown size={18} className="text-warning" />
+                                  )}
+                                  {item.type === "hotel" && (
+                                    <Building
+                                      size={18}
+                                      className="text-warning"
+                                    />
+                                  )}
+                                  <span className="text-warning fw-bold font-monospace">
+                                    {item.code}
+                                  </span>
                                 </div>
-                                <span className={`badge ${isExpired ? "bg-danger" : isCancelled ? "bg-secondary" : "bg-success"} text-white px-2.5 py-1 rounded-pill small`}>
-                                  {item.type === "epass" ? (isExpired ? "EXPIRED" : "ACTIVE E-PASS") : item.type === "vip" ? "VIP CONFIRMED" : item.status.toUpperCase()}
+                                <span
+                                  className={`badge ${isExpired ? "bg-danger" : isCancelled ? "bg-secondary" : "bg-success"} text-white px-2.5 py-1 rounded-pill small`}
+                                >
+                                  {item.type === "epass"
+                                    ? isExpired
+                                      ? "EXPIRED"
+                                      : "ACTIVE E-PASS"
+                                    : item.type === "vip"
+                                      ? "VIP CONFIRMED"
+                                      : item.status.toUpperCase()}
                                 </span>
                               </div>
 
-                              <h5 className={`text-white fw-bold mb-1 ${styles.playfairFont}`}>{item.title}</h5>
-                              <small className="text-gray-300 d-block mb-3">{item.subtitle}</small>
+                              <h5
+                                className={`text-white fw-bold mb-1 ${styles.playfairFont}`}
+                              >
+                                {item.title}
+                              </h5>
+                              <small className="text-gray-300 d-block mb-3">
+                                {item.subtitle}
+                              </small>
 
                               <div className="row g-2 small mb-3 bg-black p-3 rounded-3 border border-secondary border-opacity-30">
                                 <div className="col-6">
-                                  <span className="text-secondary d-block font-monospace" style={{ fontSize: "0.7rem" }}>DATE / TIME</span>
-                                  <span className="text-white fw-semibold">{item.date ? new Date(item.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "N/A"}</span>
+                                  <span
+                                    className="text-secondary d-block font-monospace"
+                                    style={{ fontSize: "0.7rem" }}
+                                  >
+                                    DATE / TIME
+                                  </span>
+                                  <span className="text-white fw-semibold">
+                                    {item.date
+                                      ? new Date(item.date).toLocaleTimeString(
+                                          [],
+                                          {
+                                            hour: "2-digit",
+                                            minute: "2-digit",
+                                          },
+                                        )
+                                      : "N/A"}
+                                  </span>
                                 </div>
                                 <div className="col-6">
-                                  <span className="text-secondary d-block font-monospace" style={{ fontSize: "0.7rem" }}>DEVOTEES / PAX</span>
-                                  <span className="text-warning fw-bold">{item.count || 1} Person(s)</span>
+                                  <span
+                                    className="text-secondary d-block font-monospace"
+                                    style={{ fontSize: "0.7rem" }}
+                                  >
+                                    DEVOTEES / PAX
+                                  </span>
+                                  <span className="text-warning fw-bold">
+                                    {item.count || 1} Person(s)
+                                  </span>
                                 </div>
                               </div>
                             </div>
@@ -871,7 +994,8 @@ export function UserProfile({ user, onOpenAuth, onUpdateUser }) {
                                 to="/entry-pass"
                                 className="btn btn-outline-warning btn-sm rounded-3 w-100 fw-bold d-flex align-items-center justify-content-center gap-2 mt-2 text-decoration-none"
                               >
-                                <QrCode size={16} /> View E-Pass Details &amp; QR Code
+                                <QrCode size={16} /> View E-Pass Details &amp;
+                                QR Code
                               </Link>
                             )}
 
@@ -884,27 +1008,37 @@ export function UserProfile({ user, onOpenAuth, onUpdateUser }) {
                                   style={{ width: 44, height: 44 }}
                                 />
                                 <div className="flex-grow-1">
-                                  <small className="text-success font-monospace fw-bold d-block">SCAN AT SHEETA DWAR</small>
-                                  <small className="text-secondary" style={{ fontSize: "0.7rem" }}>Official VIP Protocol Ticket</small>
+                                  <small className="text-success font-monospace fw-bold d-block">
+                                    SCAN AT SHEETA DWAR
+                                  </small>
+                                  <small
+                                    className="text-secondary"
+                                    style={{ fontSize: "0.7rem" }}
+                                  >
+                                    Official VIP Protocol Ticket
+                                  </small>
                                 </div>
                               </div>
                             )}
 
                             {item.type === "hotel" && (
                               <div className="d-flex justify-content-between align-items-center">
-                                <span className="text-warning fw-bold">₹{item.price || 0}</span>
+                                <span className="text-warning fw-bold">
+                                  ₹{item.price || 0}
+                                </span>
                                 {item.status === "confirmed" && (
                                   <button
                                     onClick={() => handleCancelBooking(item.id)}
                                     disabled={cancellingId === item.id}
                                     className="btn btn-outline-danger btn-sm rounded-pill px-3 py-1"
                                   >
-                                    {cancellingId === item.id ? "Cancelling..." : "Cancel Booking"}
+                                    {cancellingId === item.id
+                                      ? "Cancelling..."
+                                      : "Cancel Booking"}
                                   </button>
                                 )}
                               </div>
                             )}
-
                           </div>
                         </div>
                       );
@@ -912,7 +1046,6 @@ export function UserProfile({ user, onOpenAuth, onUpdateUser }) {
                   </div>
                 );
               })()}
-
             </div>
           </>
         )}

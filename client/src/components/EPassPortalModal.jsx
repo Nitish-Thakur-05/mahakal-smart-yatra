@@ -44,6 +44,18 @@ export function EPassPortalModal({ show, onClose, user, onOpenAuth }) {
     }
   }, [user]);
 
+  // Lock background body scroll when modal is active
+  useEffect(() => {
+    if (show) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [show]);
+
   // Adjust passengers when personCount changes
   const handlePersonCountChange = (count) => {
     const validCount = Math.max(1, Math.min(6, count));
@@ -87,34 +99,32 @@ export function EPassPortalModal({ show, onClose, user, onOpenAuth }) {
   const [bookingDate, setBookingDate] = useState(availableBookingDays[0].dateStr);
 
   // Form submission handler
-  const handleBookPass = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!user) {
-      toast.error("Please login first to book a Mahakal Entry Pass.");
-      if (onOpenAuth) onOpenAuth("login");
+      toast.error("Please Sign In first to book a Darshan E-Pass");
+      if (onOpenAuth) onOpenAuth();
       return;
     }
-
-    if (!primaryName.trim() || !contactPhone.trim()) {
-      toast.error("Please enter Primary Devotee Name and Contact Phone.");
-      return;
-    }
-
     setLoading(true);
     try {
-      const res = await axios.post("/api/passes/book", {
+      const res = await axios.post("/api/passes/generate-epass", {
         primaryDevoteeName: primaryName,
         contactPhone,
+        numberOfPersons: personCount,
         passengers,
-        bookingDate,
+        gateNumber: Math.floor(Math.random() * 4) + 1,
       });
 
-      toast.success(res.data.message || "Entry Pass generated successfully!");
-      setGeneratedPass(res.data.pass);
+      if (res.data.success) {
+        toast.success("Shri Mahakal Darshan E-Pass Generated Successfully! 🕉️");
+        setGeneratedPass(res.data.pass);
+      } else {
+        toast.error(res.data.message || "Failed to generate E-Pass");
+      }
     } catch (err) {
-      const errMsg =
-        err.response?.data?.error || "Failed to generate entry pass.";
-      toast.error(errMsg);
+      console.error(err);
+      toast.error("Server connection timeout. Please retry booking.");
     } finally {
       setLoading(false);
     }
@@ -124,27 +134,34 @@ export function EPassPortalModal({ show, onClose, user, onOpenAuth }) {
 
   return (
     <div
-      className="modal fade show d-block"
+      className="modal fade show d-block overflow-y-auto"
       tabIndex="-1"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
       style={{
         backgroundColor: "rgba(0, 0, 0, 0.88)",
         backdropFilter: "blur(8px)",
         zIndex: 1060,
+        position: "fixed",
+        top: 0,
+        left: 0,
+        width: "100vw",
+        height: "100vh",
+        overflowY: "auto",
       }}
     >
-      <div className="modal-dialog modal-lg modal-dialog-centered">
+      <div className="modal-dialog modal-lg modal-dialog-centered py-4">
         <div
-          className="modal-content text-white rounded-4 shadow-2xl overflow-hidden"
+          className="modal-content rounded-4 shadow-2xl overflow-hidden epass-modal-content"
           style={{
-            backgroundColor: "#0d0d0f",
-            border: "1px solid #2d2d32",
             maxHeight: "90vh",
             display: "flex",
             flexDirection: "column",
           }}
         >
           {/* MODAL HEADER */}
-          <div className="modal-header px-4 py-3 bg-black d-flex align-items-center justify-content-between border-bottom border-secondary border-opacity-20 flex-shrink-0">
+          <div className="modal-header px-4 py-3 epass-modal-header d-flex align-items-center justify-content-between flex-shrink-0">
             <div className="d-flex align-items-center gap-2">
               <span className="fs-5">🕉️</span>
               <div>
@@ -152,7 +169,7 @@ export function EPassPortalModal({ show, onClose, user, onOpenAuth }) {
                   Shri Mahakal Darshan E-Pass
                 </h6>
                 <span
-                  className="text-gray-400 small"
+                  className="text-secondary small"
                   style={{ fontSize: "0.72rem" }}
                 >
                   Shri Mahakaleshwar Temple Trust · Ujjain
@@ -161,31 +178,22 @@ export function EPassPortalModal({ show, onClose, user, onOpenAuth }) {
             </div>
             <button
               type="button"
-              className="btn-close btn-close-white"
+              className="btn-close"
               onClick={onClose}
             ></button>
           </div>
 
           {/* SCROLLABLE MODAL BODY */}
-          <div
-            className="modal-body p-4 overflow-auto flex-grow-1"
-            style={{ backgroundColor: "#141416" }}
-          >
+          <div className="modal-body p-4 p-md-4.5 overflow-auto flex-grow-1 epass-modal-body">
             {/* GENERATED PASS TICKET VIEW - DARK MODE BOARDING PASS STYLE */}
             {generatedPass ? (
               <div className="py-2 max-w-lg mx-auto">
                 {/* DARK MODE PHYSICAL BOARDING PASS STUB CARD */}
-                <div
-                  className="bg-black text-white rounded-4 shadow-2xl position-relative overflow-hidden"
-                  style={{
-                    border: "1px solid rgba(245, 158, 11, 0.4)",
-                    backgroundColor: "#0a0a0c",
-                  }}
-                >
+                <div className="epass-ticket-card rounded-4 shadow-2xl position-relative overflow-hidden">
                   {/* TOP GOLD ACCENT STRIP */}
                   <div
-                    className="bg-warning py-1.5 px-4 d-flex justify-content-between align-items-center text-dark fw-bold"
-                    style={{ fontSize: "0.75rem" }}
+                    className="bg-warning py-2.5 px-4 d-flex justify-content-between align-items-center text-dark fw-bold"
+                    style={{ fontSize: "0.78rem" }}
                   >
                     <span>SHRI MAHAKALESHWAR TEMPLE TRUST · UJJAIN</span>
                     <span className="font-monospace">
@@ -194,66 +202,66 @@ export function EPassPortalModal({ show, onClose, user, onOpenAuth }) {
                   </div>
 
                   {/* BOARDING PASS CONTENT AREA */}
-                  <div className="p-4" style={{ backgroundColor: "#111114" }}>
+                  <div className="p-4.5 p-md-5 epass-ticket-body">
                     {/* GATE & ENTRY ROUTE HEADER */}
-                    <div className="d-flex justify-content-between align-items-center mb-3 pb-3 border-bottom border-secondary border-opacity-20">
+                    <div className="d-flex justify-content-between align-items-center mb-4 pb-3.5 border-bottom border-secondary border-opacity-25">
                       <div>
                         <span
-                          className="text-warning small d-block text-uppercase fw-bold"
-                          style={{ fontSize: "0.65rem", letterSpacing: "1px" }}
+                          className="text-warning small d-block text-uppercase fw-bold mb-1"
+                          style={{ fontSize: "0.68rem", letterSpacing: "1px" }}
                         >
                           ASSIGNED ENTRY GATE
                         </span>
-                        <h3 className="fw-black text-white font-serif mb-0">
+                        <h3 className="fw-black epass-ticket-title font-serif mb-1">
                           {generatedPass.gateName}
                         </h3>
-                        <small className="text-gray-400 fw-semibold">
+                        <small className="epass-ticket-label fw-semibold">
                           Gate #{generatedPass.gateNumber} Scanner Entry
                         </small>
                       </div>
                       <div className="text-end">
-                        <span className="badge bg-warning text-dark px-3 py-1.5 font-monospace fw-bold rounded-pill">
+                        <span className="badge bg-warning text-dark px-3.5 py-2 font-monospace fw-bold rounded-pill shadow-sm">
                           CONFIRMED PASS
                         </span>
                       </div>
                     </div>
 
                     {/* KEY METRICS GRID */}
-                    <div className="row g-2 text-sm mb-3">
-                      <div className="col-6">
+                    <div className="row g-3 text-sm mb-4">
+                      <div className="col-6 mb-2">
                         <span
-                          className="text-gray-400 d-block text-uppercase fw-bold"
-                          style={{ fontSize: "0.65rem" }}
+                          className="epass-ticket-label d-block text-uppercase fw-bold mb-1"
+                          style={{ fontSize: "0.68rem" }}
                         >
                           PRIMARY DEVOTEE
                         </span>
-                        <strong className="text-white text-truncate d-block">
+                        <strong className="epass-ticket-title text-truncate d-block fs-6">
                           {generatedPass.primaryDevoteeName}
                         </strong>
                       </div>
-                      <div className="col-6">
+                      <div className="col-6 mb-2">
                         <span
-                          className="text-gray-400 d-block text-uppercase fw-bold"
-                          style={{ fontSize: "0.65rem" }}
+                          className="epass-ticket-label d-block text-uppercase fw-bold mb-1"
+                          style={{ fontSize: "0.68rem" }}
                         >
                           TOTAL DEVOTEES
                         </span>
-                        <strong className="text-warning">
+                        <strong className="text-warning d-block fs-6">
                           {generatedPass.numberOfPersons} Devotee(s)
                         </strong>
                       </div>
 
                       <div className="col-6">
                         <span
-                          className="text-gray-400 d-block text-uppercase fw-bold"
-                          style={{ fontSize: "0.65rem" }}
+                          className="epass-ticket-label d-block text-uppercase fw-bold mb-1"
+                          style={{ fontSize: "0.68rem" }}
                         >
                           ISSUE TIME
                         </span>
-                        <span className="text-warning d-block font-monospace fw-semibold" style={{ fontSize: "0.74rem" }}>
+                        <span className="text-warning d-block font-monospace fw-semibold mb-0.5" style={{ fontSize: "0.78rem" }}>
                           {generatedPass.bookingDate || new Date(generatedPass.entryTime || generatedPass.createdAt).toISOString().substring(0, 10)}
                         </span>
-                        <strong className="text-white font-monospace fs-6">
+                        <strong className="epass-ticket-title font-monospace fs-6">
                           {new Date(generatedPass.entryTime).toLocaleTimeString(
                             [],
                             { hour: "2-digit", minute: "2-digit" },
@@ -262,12 +270,12 @@ export function EPassPortalModal({ show, onClose, user, onOpenAuth }) {
                       </div>
                       <div className="col-6">
                         <span
-                          className="text-gray-400 d-block text-uppercase fw-bold"
-                          style={{ fontSize: "0.65rem" }}
+                          className="epass-ticket-label d-block text-uppercase fw-bold mb-1"
+                          style={{ fontSize: "0.68rem" }}
                         >
                           EXPIRE TIME
                         </span>
-                        <span className="text-warning d-block font-monospace fw-semibold" style={{ fontSize: "0.74rem" }}>
+                        <span className="text-warning d-block font-monospace fw-semibold mb-0.5" style={{ fontSize: "0.78rem" }}>
                           {new Date(generatedPass.expiryTime).toISOString().substring(0, 10)}
                         </span>
                         <strong className="text-danger font-monospace fs-6">
@@ -282,18 +290,18 @@ export function EPassPortalModal({ show, onClose, user, onOpenAuth }) {
                     </div>
 
                     {/* REGISTERED PASSENGERS LIST */}
-                    <div className="mb-3 pt-2 border-top border-secondary border-opacity-20">
+                    <div className="mb-2 pt-3 border-top border-secondary border-opacity-25">
                       <span
-                        className="text-gray-400 d-block text-uppercase fw-bold mb-1"
-                        style={{ fontSize: "0.65rem" }}
+                        className="epass-ticket-label d-block text-uppercase fw-bold mb-2"
+                        style={{ fontSize: "0.68rem" }}
                       >
                         PASSENGER LIST:
                       </span>
-                      <div className="d-flex flex-wrap gap-1">
+                      <div className="d-flex flex-wrap gap-2">
                         {generatedPass.passengers.map((p, idx) => (
                           <span
                             key={idx}
-                            className="badge bg-dark text-gray-200 border border-secondary border-opacity-30 px-2 py-1 small"
+                            className="badge epass-passenger-badge px-3 py-1.5 small rounded-pill"
                           >
                             {p.name} ({p.age}y, {p.gender})
                           </span>
@@ -303,9 +311,9 @@ export function EPassPortalModal({ show, onClose, user, onOpenAuth }) {
                   </div>
 
                   {/* PERFORATED DOTTED SEPARATOR STUB WITH CORNER NOTCHES */}
-                  <div className="position-relative bg-black py-2 px-4 d-flex align-items-center justify-content-between border-top border-bottom border-secondary border-opacity-30">
+                  <div className="position-relative epass-ticket-stub py-2.5 px-4 d-flex align-items-center justify-content-between border-top border-bottom border-secondary border-opacity-30">
                     <div
-                      className="position-absolute rounded-circle bg-dark"
+                      className="position-absolute rounded-circle epass-ticket-body"
                       style={{
                         width: 24,
                         height: 24,
@@ -315,7 +323,7 @@ export function EPassPortalModal({ show, onClose, user, onOpenAuth }) {
                       }}
                     ></div>
                     <div
-                      className="position-absolute rounded-circle bg-dark"
+                      className="position-absolute rounded-circle epass-ticket-body"
                       style={{
                         width: 24,
                         height: 24,
@@ -328,15 +336,15 @@ export function EPassPortalModal({ show, onClose, user, onOpenAuth }) {
                   </div>
 
                   {/* BOTTOM SCANNER STUB AREA WITH QR CODE */}
-                  <div className="p-4 bg-black text-center">
-                    <div className="d-flex flex-column flex-sm-row align-items-center justify-content-between gap-3">
+                  <div className="p-4.5 p-md-5 epass-ticket-stub text-center">
+                    <div className="d-flex flex-column flex-sm-row align-items-center justify-content-between gap-4">
                       <div className="text-start">
-                        <div className="d-flex align-items-center gap-1.5 text-success fw-bold small mb-1">
-                          <ShieldCheck size={16} /> OFFICIAL VERIFIED PASS
+                        <div className="d-flex align-items-center gap-2 text-success fw-bold small mb-2">
+                          <ShieldCheck size={18} /> OFFICIAL VERIFIED PASS
                         </div>
                         <p
-                          className="text-gray-400 small mb-0"
-                          style={{ fontSize: "0.72rem" }}
+                          className="epass-ticket-label small mb-0 leading-relaxed"
+                          style={{ fontSize: "0.78rem" }}
                         >
                           Present QR code to automated scanner at Gate #
                           {generatedPass.gateNumber} entry turnstile.
@@ -344,19 +352,19 @@ export function EPassPortalModal({ show, onClose, user, onOpenAuth }) {
                       </div>
 
                       {/* QR CODE BOX */}
-                      <div className="p-2 bg-white rounded-3 flex-shrink-0 text-center">
+                      <div className="p-3 bg-white rounded-4 flex-shrink-0 text-center shadow-md">
                         <QRCodeDisplay
                           value={
                             generatedPass.qrPayload || generatedPass.passId
                           }
-                          size={130}
+                          size={140}
                           className="mx-auto"
                         />
                         <span
-                          className="font-monospace text-dark d-block mt-1 fw-bold"
-                          style={{ fontSize: "0.62rem" }}
+                          className="font-monospace text-dark d-block mt-2 fw-bold"
+                          style={{ fontSize: "0.75rem" }}
                         >
-                          {generatedPass.passId}
+                          GATE #{generatedPass.gateNumber} SCANNER VERIFIED
                         </span>
                       </div>
                     </div>

@@ -68,7 +68,7 @@ export function HeroCarousel() {
   };
 
   return (
-    <div className="position-relative w-100 overflow-hidden bg-black text-white" style={{ height: '100vh', minHeight: '100vh' }}>
+    <div className="hero-carousel-container position-relative w-100 overflow-hidden bg-black text-white" style={{ height: '100vh', minHeight: '100vh' }}>
       {/* 100vh Fullscreen Video Background */}
       <div className="position-absolute top-0 start-0 w-100 h-100 overflow-hidden" style={{ zIndex: 1 }}>
         <video

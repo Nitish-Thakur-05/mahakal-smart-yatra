@@ -167,18 +167,12 @@ img {
 }
 
 /* PRESERVE PURE WHITE TEXT ON HERO VIDEO CAROUSEL & IMAGE DECK CARDS */
-[data-theme="light"] [style*="height: 100vh"] h1,
-[data-theme="light"] [style*="height: 100vh"] p,
-[data-theme="light"] [style*="height: 100vh"] span,
-[data-theme="light"] [style*="height: 100vh"] div,
-[data-theme="light"] [style*="height: 100vh"] .text-white,
-[data-theme="light"] [style*="height: 100vh"] .text-light,
-[data-theme="light"] [style*="min-height: 100vh"] h1,
-[data-theme="light"] [style*="min-height: 100vh"] p,
-[data-theme="light"] [style*="min-height: 100vh"] span,
-[data-theme="light"] [style*="min-height: 100vh"] div,
-[data-theme="light"] [style*="min-height: 100vh"] .text-white,
-[data-theme="light"] [style*="min-height: 100vh"] .text-light,
+[data-theme="light"] .hero-carousel-container h1,
+[data-theme="light"] .hero-carousel-container p,
+[data-theme="light"] .hero-carousel-container span,
+[data-theme="light"] .hero-carousel-container div,
+[data-theme="light"] .hero-carousel-container .text-white,
+[data-theme="light"] .hero-carousel-container .text-light,
 [data-theme="light"] [class*="deckCard"] h3,
 [data-theme="light"] [class*="deckCard"] p,
 [data-theme="light"] [class*="cardContent"] h3,
@@ -187,8 +181,7 @@ img {
   text-shadow: 0 2px 8px rgba(0, 0, 0, 0.9) !important;
 }
 
-[data-theme="light"] [style*="height: 100vh"] .text-warning,
-[data-theme="light"] [style*="min-height: 100vh"] .text-warning,
+[data-theme="light"] .hero-carousel-container .text-warning,
 [data-theme="light"] [class*="deckCard"] .text-warning,
 [data-theme="light"] [class*="cardContent"] .text-warning {
   color: #fbbf24 !important;
@@ -231,6 +224,15 @@ img {
   color: #ffffff !important;
   font-weight: 600 !important;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.7) !important;
+}
+
+/* Ensure Hotel Banner Title over Dark Image Overlay remains crisp white in both Light and Dark mode */
+.hotel-overlay-title,
+[data-theme="light"] .hotel-overlay-title,
+[data-theme="light"] h2.hotel-overlay-title,
+[data-theme="light"] h3.hotel-overlay-title {
+  color: #ffffff !important;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.9) !important;
 }
 
 /* Transparent / Scrolled Navbar in Light Mode ON INNER PAGES = BLACK TEXT */
@@ -623,4 +625,231 @@ img {
 /* Progress bars */
 [data-theme="light"] .progress {
   background-color: #e5e7eb !important;
+}
+
+/* User Profile & Hotel Header Card Styling (Rich Golden Amber in Dark Mode, Soft Warm Gradient in Light Mode) */
+.user-profile-header-card {
+  background: linear-gradient(
+    135deg,
+    #1c1409 0%,
+    #362409 50%,
+    #191106 100%
+  ) !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(245, 158, 11, 0.45) !important;
+  box-shadow:
+    0 15px 40px rgba(0, 0, 0, 0.8),
+    0 0 25px rgba(245, 158, 11, 0.15) !important;
+}
+
+[data-theme="light"] .user-profile-header-card {
+  background: linear-gradient(135deg, #ffffff 0%, #fef3c7 100%) !important;
+  color: #111827 !important;
+  border-color: rgba(217, 119, 6, 0.4) !important;
+  box-shadow: 0 10px 30px rgba(217, 119, 6, 0.15) !important;
+}
+
+[data-theme="light"] .user-profile-header-card h1,
+[data-theme="light"] .user-profile-header-card h2,
+[data-theme="light"] .user-profile-header-card h3,
+[data-theme="light"] .user-profile-header-card h4,
+[data-theme="light"] .user-profile-header-card h5,
+[data-theme="light"] .user-profile-header-card h6,
+[data-theme="light"] .user-profile-header-card .text-white,
+[data-theme="light"] .user-profile-header-card .text-light {
+  color: #111827 !important;
+}
+
+[data-theme="light"] .user-profile-header-card p,
+[data-theme="light"] .user-profile-header-card .text-secondary {
+  color: #4b5563 !important;
+}
+
+[data-theme="light"] .user-profile-header-card .bg-dark,
+[data-theme="light"] .user-profile-header-card .bg-black {
+  background-color: #ffffff !important;
+  color: #111827 !important;
+  border-color: rgba(217, 119, 6, 0.25) !important;
+}
+
+/* Footer Brand Logo & Footer Container (Dark & Light theme support) */
+.footer-brand-name {
+  color: #ffffff;
+}
+
+[data-theme="light"] footer {
+  background-color: #ffffff !important;
+  color: #111827 !important;
+  border-top-color: rgba(217, 119, 6, 0.3) !important;
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.05) !important;
+}
+
+[data-theme="light"] .footer-brand-name {
+  color: #111827 !important;
+}
+
+[data-theme="light"] footer .text-secondary,
+[data-theme="light"] footer a.text-secondary,
+[data-theme="light"] footer p {
+  color: #4b5563 !important;
+}
+
+[data-theme="light"] footer .text-warning,
+[data-theme="light"] footer h6 {
+  color: #d97706 !important;
+}
+
+/* Helper class for generous card padding */
+.p-4\.5 {
+  padding: 1.75rem !important;
+}
+
+/* Physical E-Pass Ticket Card (Theme Adaptive: Rich Dark Amber in Dark Mode, Golden Cream White in Light Mode) */
+.epass-ticket-card {
+  background-color: #120f0a !important;
+  color: #ffffff !important;
+  border: 1.5px solid rgba(245, 158, 11, 0.45) !important;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6) !important;
+}
+
+.epass-ticket-body {
+  background-color: #1a160e !important;
+}
+
+.epass-ticket-stub {
+  background-color: #0e0c08 !important;
+}
+
+.epass-ticket-title {
+  color: #ffffff !important;
+}
+
+.epass-ticket-label {
+  color: #9ca3af !important;
+}
+
+.epass-passenger-badge {
+  background-color: #262015 !important;
+  color: #f3f4f6 !important;
+  border: 1px solid rgba(245, 158, 11, 0.3) !important;
+}
+
+/* Light Mode Overrides for Physical E-Pass Ticket Card */
+[data-theme="light"] .epass-ticket-card {
+  background-color: #fefce8 !important;
+  color: #111827 !important;
+  border: 1.5px solid rgba(217, 119, 6, 0.45) !important;
+  box-shadow: 0 12px 30px rgba(217, 119, 6, 0.18) !important;
+}
+
+[data-theme="light"] .epass-ticket-body {
+  background-color: #ffffff !important;
+}
+
+[data-theme="light"] .epass-ticket-stub {
+  background-color: #fffbeb !important;
+}
+
+[data-theme="light"] .epass-ticket-title {
+  color: #111827 !important;
+}
+
+[data-theme="light"] .epass-ticket-label {
+  color: #4b5563 !important;
+}
+
+[data-theme="light"] .epass-passenger-badge {
+  background-color: #fef3c7 !important;
+  color: #78350f !important;
+  border: 1px solid rgba(217, 119, 6, 0.35) !important;
+  font-weight: 600 !important;
+}
+
+/* E-Pass Modal Container (Theme Adaptive for seamless scrolling in Light & Dark mode) */
+.epass-modal-content {
+  background-color: #0d0d0f !important;
+  color: #ffffff !important;
+  border: 1px solid #2d2d32 !important;
+}
+
+.epass-modal-header {
+  background-color: #000000 !important;
+  border-bottom: 1px solid rgba(245, 158, 11, 0.25) !important;
+}
+
+.epass-modal-body {
+  background-color: #141416 !important;
+}
+
+/* Light Mode Overrides for E-Pass Modal Container */
+[data-theme="light"] .epass-modal-content {
+  background-color: #ffffff !important;
+  color: #111827 !important;
+  border: 1px solid rgba(217, 119, 6, 0.3) !important;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2) !important;
+}
+
+[data-theme="light"] .epass-modal-header {
+  background-color: #fffbeb !important;
+  border-bottom: 1px solid rgba(217, 119, 6, 0.3) !important;
+}
+
+[data-theme="light"] .epass-modal-header .modal-title,
+[data-theme="light"] .epass-modal-header h6 {
+  color: #b45309 !important;
+}
+
+[data-theme="light"] .epass-modal-header .btn-close {
+  filter: none !important;
+}
+
+[data-theme="light"] .epass-modal-body {
+  background-color: #f8fafc !important;
+}
+
+/* Explicitly strip text shadows from all Modal and E-Pass Ticket elements in Light & Dark Mode */
+.modal,
+.modal *,
+.modal-dialog,
+.modal-dialog *,
+.modal-content,
+.modal-content *,
+.modal-header,
+.modal-header *,
+.modal-body,
+.modal-body *,
+.epass-modal-content,
+.epass-modal-content *,
+.epass-ticket-card,
+.epass-ticket-card *,
+.epass-modal-body,
+.epass-modal-body *,
+.epass-ticket-body,
+.epass-ticket-body *,
+.epass-ticket-stub,
+.epass-ticket-stub *,
+.epass-passenger-badge,
+[data-theme="light"] .modal,
+[data-theme="light"] .modal *,
+[data-theme="light"] .modal-dialog,
+[data-theme="light"] .modal-dialog *,
+[data-theme="light"] .modal-content,
+[data-theme="light"] .modal-content *,
+[data-theme="light"] .modal-header,
+[data-theme="light"] .modal-header *,
+[data-theme="light"] .modal-body,
+[data-theme="light"] .modal-body *,
+[data-theme="light"] .epass-modal-content,
+[data-theme="light"] .epass-modal-content *,
+[data-theme="light"] .epass-ticket-card,
+[data-theme="light"] .epass-ticket-card *,
+[data-theme="light"] .epass-modal-body,
+[data-theme="light"] .epass-modal-body *,
+[data-theme="light"] .epass-ticket-body,
+[data-theme="light"] .epass-ticket-body *,
+[data-theme="light"] .epass-ticket-stub,
+[data-theme="light"] .epass-ticket-stub *,
+[data-theme="light"] .epass-passenger-badge {
+  text-shadow: none !important;
+  filter: none !important;
 }
