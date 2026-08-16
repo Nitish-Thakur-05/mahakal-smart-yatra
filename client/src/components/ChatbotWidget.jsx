@@ -63,24 +63,45 @@ export function ChatbotWidget() {
     setIsLoading(true);
 
     try {
-      const res = await axios.post("/api/chat-bot", {
-        message: messageContent,
-        conversationHistory: messages,
-      });
+      const headers = {};
+      if (import.meta.env.VITE_N8N_CHAT_URL) {
+        headers["x-n8n-chat-url"] = import.meta.env.VITE_N8N_CHAT_URL;
+      }
+
+      const res = await axios.post(
+        "/api/chat-bot",
+        {
+          message: messageContent,
+          conversationHistory: messages,
+        },
+        { headers }
+      );
+
+      const replyContent =
+        res.data?.reply ||
+        res.data?.response ||
+        res.data?.output ||
+        res.data?.text ||
+        "Unable to process response from assistant.";
 
       const assistantMessage = {
         id: `${Date.now()}-assistant`,
         type: "assistant",
-        content: res.data.reply || res.data.response || "Unable to process request.",
+        content: replyContent,
         timestamp: new Date(),
       };
 
       setMessages((prev) => [...prev, assistantMessage]);
     } catch (error) {
+      const serverErrorMessage =
+        error.response?.data?.reply ||
+        error.response?.data?.error ||
+        "Failed to connect to n8n chatbot. Please check your n8n server/webhook configuration.";
+
       const errorMessage = {
         id: `${Date.now()}-error`,
         type: "assistant",
-        content: "Daily Bhasma Aarti starts at 04:00 AM. Temple is open 04:00 AM to 11:00 PM daily.",
+        content: serverErrorMessage,
         timestamp: new Date(),
       };
       setMessages((prev) => [...prev, errorMessage]);
@@ -154,7 +175,14 @@ export function ChatbotWidget() {
                           ? "bg-warning text-dark fw-semibold"
                           : "bg-dark text-light border border-secondary border-opacity-25"
                       }`}
-                      style={{ maxWidth: '82%', fontSize: '0.85rem' }}
+                      style={{
+                        maxWidth: '85%',
+                        fontSize: '0.85rem',
+                        whiteSpace: 'pre-wrap',
+                        wordBreak: 'break-word',
+                        overflowWrap: 'anywhere',
+                        lineHeight: '1.45',
+                      }}
                     >
                       {msg.content}
                     </div>
