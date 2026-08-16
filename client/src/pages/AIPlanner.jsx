@@ -58,14 +58,133 @@ export function AIPlanner() {
     }
   };
 
+  // Helper to normalize and validate plan data structure received from n8n or backend APIs
+  const normalizeAndValidatePlan = (rawPlan) => {
+    if (!rawPlan) return null;
+
+    let planObj = rawPlan.plan || rawPlan.output || rawPlan;
+    if (typeof planObj === "string") {
+      try {
+        planObj = JSON.parse(planObj);
+      } catch (e) {
+        return null;
+      }
+    }
+
+    if (!planObj || typeof planObj !== "object") return null;
+
+    const title = planObj.title || planObj.name || "Custom Ujjain Pilgrimage Plan";
+    const subtitle =
+      planObj.subtitle ||
+      planObj.summary ||
+      "Tailored Sacred Itinerary for Shri Mahakaleshwar";
+    const summary = planObj.summary || subtitle;
+
+    let days = Array.isArray(planObj.days)
+      ? planObj.days
+      : Array.isArray(planObj.itinerary)
+      ? planObj.itinerary
+      : null;
+
+    if (!days || !Array.isArray(days) || days.length === 0) {
+      return null;
+    }
+
+    const normalizedDays = days.map((d, dIdx) => {
+      const dayNumber = d.dayNumber || d.day || dIdx + 1;
+      const theme = d.theme || d.title || `Day ${dayNumber} Exploration`;
+      const tip = d.tip || d.note || "Wear traditional attire and carry water.";
+
+      const rawSchedule = Array.isArray(d.schedule)
+        ? d.schedule
+        : Array.isArray(d.activities)
+        ? d.activities
+        : Array.isArray(d.items)
+        ? d.items
+        : [];
+
+      const schedule = rawSchedule.map((item) => ({
+        time: item.time || "Flexible",
+        title: item.title || item.name || "Sacred Visit",
+        location: item.location || item.place || "Mahakal Temple Complex",
+        description: item.description || item.details || "",
+        category: item.category || item.type || "Darshan",
+      }));
+
+      return {
+        dayNumber,
+        theme,
+        tip,
+        schedule,
+      };
+    });
+
+    return {
+      title,
+      subtitle,
+      summary,
+      days: normalizedDays,
+    };
+  };
+
   const handleGenerate = async (e) => {
     e.preventDefault();
     setLoading(true);
 
     const numDays = Math.min(Math.max(parseInt(days, 10) || 1, 1), 7);
+    const n8nWebhookUrl = import.meta.env.VITE_N8N_ITINERARY_WEBHOOK_URL;
 
+    // 1. PRIMARY: Try n8n AI Itinerary Webhook
+    if (
+      n8nWebhookUrl &&
+      !n8nWebhookUrl.includes("your-n8n-domain") &&
+      n8nWebhookUrl.trim() !== ""
+    ) {
+      try {
+        const uniqueVariationSeed = `${Date.now()}_${Math.floor(Math.random() * 1000000)}`;
+        const payload = {
+          numberOfDays: String(numDays),
+          travelPace,
+          groupType,
+          selectedInterests: interests,
+          customNotes,
+          uniqueVariationSeed,
+        };
+
+        const response = await axios.post(n8nWebhookUrl, payload, {
+          headers: {
+            "Content-Type": "application/json",
+          },
+          timeout: 45000,
+        });
+
+        const validatedPlan = normalizeAndValidatePlan(response.data);
+        if (validatedPlan) {
+          setPlan(validatedPlan);
+          setPlanSource("n8n-ai");
+          setActiveDayTab(0);
+          toast.success("Your custom AI pilgrimage plan is ready!");
+          setLoading(false);
+          return;
+        } else {
+          console.warn(
+            "n8n returned malformed itinerary data structure. Falling back to backend endpoint."
+          );
+        }
+      } catch (err) {
+        console.warn(
+          "n8n AI itinerary webhook primary call failed. Activating fallback 1 (backend endpoint):",
+          err.message
+        );
+      }
+    } else {
+      console.info(
+        "VITE_N8N_ITINERARY_WEBHOOK_URL is not set or using placeholder. Proceeding to fallback 1."
+      );
+    }
+
+    // 2. FALLBACK 1: Try Backend Gemini / API Generator Endpoint
     try {
-      // 1. Try Backend Gemini / API Generator
       const res = await axios.post("/api/itineraries/generate", {
         days,
         travelPace,
@@ -75,31 +194,34 @@ export function AIPlanner() {
       });
 
       if (res.data && res.data.plan) {
-        setPlan(res.data.plan);
-        setPlanSource(res.data.source || "gemini-ai");
-        setActiveDayTab(0);
-        if (res.data.source === "gemini-ai") {
-          toast.success("Your custom pilgrimage plan is ready!");
-        } else {
-          toast.success("Fresh Custom AI Pilgrimage Plan generated!");
+        const validatedBackendPlan = normalizeAndValidatePlan(res.data.plan);
+        if (validatedBackendPlan) {
+          setPlan(validatedBackendPlan);
+          setPlanSource(res.data.source || "gemini-ai");
+          setActiveDayTab(0);
+          if (res.data.source === "gemini-ai") {
+            toast.success("Your custom pilgrimage plan is ready!");
+          } else {
+            toast.success("Fresh Custom AI Pilgrimage Plan generated!");
+          }
+          setLoading(false);
+          return;
         }
-        setLoading(false);
-        return;
       }
     } catch (err) {
       console.warn(
-        "Backend itinerary API endpoint call fallback activated:",
-        err.message,
+        "Backend itinerary API endpoint call failed. Activating fallback 2 (client dynamic generator):",
+        err.message
       );
     }
 
-    // 2. Client-side Dynamic Generator Fallback with Randomization
+    // 3. FALLBACK 2: Client-side Dynamic Generator Fallback with Randomization
     const clientPlan = generateClientDynamicPlan(
       numDays,
       travelPace,
       groupType,
       interests,
-      customNotes,
+      customNotes
     );
     setPlan(clientPlan);
     setPlanSource("dynamic-ai");
@@ -352,24 +474,24 @@ export function AIPlanner() {
                             className="card bg-black text-white p-4 rounded-4 border border-secondary border-opacity-25 shadow-sm transition-all hover-border-warning overflow-hidden"
                           >
                             {/* Header: Time Badge Left + Category Right */}
-                            <div className="d-flex align-items-center justify-content-between mb-3">
+                            <div className="d-flex align-items-center justify-content-between mb-3 gap-2 flex-wrap">
                               <span
-                                className="badge bg-black text-warning border border-warning border-opacity-30 rounded-pill px-3 py-1.5 font-monospace fw-bold small d-inline-flex align-items-center gap-1.5"
-                                style={{ fontSize: "0.8rem" }}
+                                className="badge bg-black text-warning border border-warning border-opacity-30 rounded-pill px-3 py-1.5 font-monospace fw-bold small d-inline-flex align-items-center gap-2 text-nowrap"
+                                style={{ fontSize: "0.8rem", whiteSpace: "nowrap" }}
                               >
                                 <Clock
-                                  size={13}
-                                  className="text-warning flex-shrink-0"
+                                  size={14}
+                                  className="text-warning flex-shrink-0 me-1"
                                 />
-                                {slot.time}
+                                <span>{slot.time}</span>
                               </span>
 
                               <span
-                                className="badge bg-dark text-secondary border border-secondary border-opacity-30 rounded-pill px-3 py-1.5 small font-semibold d-inline-flex align-items-center gap-1.5"
-                                style={{ fontSize: "0.75rem" }}
+                                className="badge bg-dark text-secondary border border-secondary border-opacity-30 rounded-pill px-3 py-1.5 small font-semibold d-inline-flex align-items-center gap-2 text-nowrap"
+                                style={{ fontSize: "0.75rem", whiteSpace: "nowrap" }}
                               >
                                 {getCategoryIcon(slot.category)}
-                                {slot.category || "Activity"}
+                                <span className="ms-1">{slot.category || "Activity"}</span>
                               </span>
                             </div>
 
@@ -390,14 +512,14 @@ export function AIPlanner() {
                             </p>
 
                             {/* Footer: Location Pin */}
-                            <div className="pt-3 border-top border-secondary border-opacity-20 d-flex align-items-center justify-content-between">
+                            <div className="pt-3 border-top border-secondary border-opacity-20 d-flex align-items-center justify-content-between flex-wrap gap-2">
                               <span
-                                className="text-warning small d-inline-flex align-items-center gap-1.5"
+                                className="text-warning small d-inline-flex align-items-center gap-2"
                                 style={{ fontSize: "0.82rem" }}
                               >
                                 <MapPin
-                                  size={13}
-                                  className="text-warning flex-shrink-0"
+                                  size={14}
+                                  className="text-warning flex-shrink-0 me-1"
                                 />
                                 <span className="fw-medium">
                                   {slot.location}
