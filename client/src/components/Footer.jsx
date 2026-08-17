@@ -39,7 +39,7 @@ export function Footer() {
             <ul className="list-unstyled text-secondary small d-flex flex-column gap-2">
               <li>
                 <Link
-                  to="/temples"
+                  to="/navigation"
                   className="text-secondary text-decoration-none hover-warning"
                 >
                   Shrines & 360°

@@ -119,6 +119,11 @@ export function Navbar({ onOpenAuth, onOpenPassPortal, user, onLogout }) {
 
   const moreDropdownItems = [
     {
+      to: "/temple-view",
+      icon: Compass,
+      label: "360° Temple View",
+    },
+    {
       to: "/vip-darshan",
       icon: Crown,
       label: "VIP Darshan",
@@ -136,7 +141,7 @@ export function Navbar({ onOpenAuth, onOpenPassPortal, user, onLogout }) {
     {
       to: "/map",
       icon: MapPin,
-      label: "Navigation",
+      label: "Map & Gates",
     },
     {
       to: "/support",
@@ -146,6 +151,8 @@ export function Navbar({ onOpenAuth, onOpenPassPortal, user, onLogout }) {
   ];
 
   const isMoreActive = [
+    "/temple-view",
+    "/navigation",
     "/hotels",
     "/announcements",
     "/vip-darshan",

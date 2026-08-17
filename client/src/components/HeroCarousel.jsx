@@ -115,7 +115,7 @@ export function HeroCarousel() {
                 {currentTemple.description}
               </p>
               <div className="d-flex justify-content-center gap-3">
-                <Link to="/temples" className={styles.goldBtn}>
+                <Link to="/navigation" className={styles.goldBtn}>
                   <Eye size={18} className="me-2" /> Explore Shrines 360°
                 </Link>
               </div>

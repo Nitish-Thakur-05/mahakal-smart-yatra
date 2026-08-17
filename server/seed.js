@@ -329,7 +329,7 @@ async function seedDatabase() {
         email: "admin@mahakal.com",
         password: "admin123",
         role: "official",
-        isApproved: true
+        isApproved: true,
       });
       console.log("Seeded Mahakal Admin user: admin@mahakal.com / admin123");
     }
@@ -343,10 +343,21 @@ async function seedDatabase() {
       { num: 2, name: "Gate 2 - Nandi Dwar (Main Gate)", dist: 650 },
       { num: 3, name: "Gate 3 - VIP / Shankhadwar Gate", dist: 400 },
       { num: 4, name: "Gate 4 - Char Dham Dwar", dist: 1000 },
-      { num: 5, name: "Gate 5 - Harsiddhi Gate", dist: 750 }
+      { num: 5, name: "Gate 5 - Harsiddhi Gate", dist: 750 },
     ];
-    const names = ["Rajesh Kumar", "Amit Sharma", "Priya Verma", "Sunil Joshi", "Ananya Gupta", "Vikas Patel", "Deepak Rao", "Meena Tiwari", "Suresh Yadav", "Kavita Mishra"];
-    const crowdLevels = ['Low', 'Moderate', 'High', 'Festival Peak'];
+    const names = [
+      "Rajesh Kumar",
+      "Amit Sharma",
+      "Priya Verma",
+      "Sunil Joshi",
+      "Ananya Gupta",
+      "Vikas Patel",
+      "Deepak Rao",
+      "Meena Tiwari",
+      "Suresh Yadav",
+      "Kavita Mishra",
+    ];
+    const crowdLevels = ["Low", "Moderate", "High", "Festival Peak"];
 
     // Generate 40 representative sample pass bookings spread across past days, festival times, and hours
     const now = new Date();
@@ -355,13 +366,21 @@ async function seedDatabase() {
       const primaryName = names[i % names.length];
       const persons = (i % 5) + 1; // 1 to 5 persons
       const crowd = crowdLevels[i % crowdLevels.length];
-      const isFest = (i % 3 === 0);
+      const isFest = i % 3 === 0;
 
       // Random date within last 6 months
       const randomMonthOffset = i % 6;
-      const passDate = new Date(now.getFullYear(), now.getMonth() - randomMonthOffset, (i * 2 % 25) + 1, (i * 3) % 24, 15);
-      const validityMins = 120 + (i * 10 % 90);
-      const expiryDate = new Date(passDate.getTime() + validityMins * 60 * 1000);
+      const passDate = new Date(
+        now.getFullYear(),
+        now.getMonth() - randomMonthOffset,
+        ((i * 2) % 25) + 1,
+        (i * 3) % 24,
+        15,
+      );
+      const validityMins = 120 + ((i * 10) % 90);
+      const expiryDate = new Date(
+        passDate.getTime() + validityMins * 60 * 1000,
+      );
       const passId = `MPASS-2026-${100000 + i * 1234}`;
 
       samplePasses.push({
@@ -369,12 +388,14 @@ async function seedDatabase() {
         userId: adminUser._id,
         primaryDevoteeName: primaryName,
         contactPhone: `+91 98765${10000 + i}`,
-        passengers: Array(persons).fill(0).map((_, idx) => ({
-          name: idx === 0 ? primaryName : `${primaryName} Guest ${idx + 1}`,
-          age: 20 + idx * 5,
-          gender: idx % 2 === 0 ? 'Male' : 'Female',
-          idProof: 'Aadhar Card'
-        })),
+        passengers: Array(persons)
+          .fill(0)
+          .map((_, idx) => ({
+            name: idx === 0 ? primaryName : `${primaryName} Guest ${idx + 1}`,
+            age: 20 + idx * 5,
+            gender: idx % 2 === 0 ? "Male" : "Female",
+            idProof: "Aadhar Card",
+          })),
         numberOfPersons: persons,
         gateNumber: gate.num,
         gateName: gate.name,
@@ -384,8 +405,13 @@ async function seedDatabase() {
         expiryTime: expiryDate,
         validityMins,
         isFestivalTime: isFest,
-        status: i === 0 ? 'active' : (i % 4 === 0 ? 'used' : 'expired'),
-        qrPayload: JSON.stringify({ passId, gateNo: gate.num, primaryDevotee: primaryName, personsCount: persons })
+        status: i === 0 ? "active" : i % 4 === 0 ? "used" : "expired",
+        qrPayload: JSON.stringify({
+          passId,
+          gateNo: gate.num,
+          primaryDevotee: primaryName,
+          personsCount: persons,
+        }),
       });
     }
 

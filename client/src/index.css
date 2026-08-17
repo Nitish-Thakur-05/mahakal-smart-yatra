@@ -458,7 +458,8 @@ img {
 }
 
 /* Light Mode Tab Selector Pills & Unselected Buttons */
-[data-theme="light"] .p-1.5.bg-dark,
+[data-theme="light"] .p-1\.5.bg-dark,
+
 [data-theme="light"] div[class*="bg-dark"].rounded-pill {
   background-color: #e2e8f0 !important;
   border-color: #cbd5e1 !important;

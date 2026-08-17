@@ -722,7 +722,9 @@ export function TempleMap() {
                         📍 GPS Pin: {gate.coordinates}
                       </span>
                     </div>
-                    <p className="text-secondary small mb-4 leading-relaxed">{gate.desc}</p>
+                    <p className="text-secondary small mb-4 leading-relaxed">
+                      {gate.desc}
+                    </p>
 
                     <div className="mb-4">
                       <h6

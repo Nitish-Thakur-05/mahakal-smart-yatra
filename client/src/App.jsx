@@ -32,6 +32,7 @@ import { Support } from "./pages/Support";
 import { VIPDarshan } from "./pages/VIPDarshan";
 import { EntryPassPage } from "./pages/EntryPassPage";
 import { EPassPortalModal } from "./components/EPassPortalModal";
+import { Navigation } from "./pages/Navigation/Navigation";
 
 function MainApp() {
   const navigate = useNavigate();
@@ -175,6 +176,8 @@ function MainApp() {
               element={<VIPDarshan user={user} onOpenAuth={handleOpenAuth} />}
             />
             <Route path="/map" element={<TempleMap />} />
+            <Route path="/navigation" element={<Navigation />} />
+            <Route path="/temple-view" element={<Navigation />} />
             <Route
               path="/support"
               element={<Support user={user} onOpenAuth={handleOpenAuth} />}
