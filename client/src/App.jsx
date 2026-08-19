@@ -122,7 +122,6 @@ function MainApp() {
         }}
       />
       <div className="d-flex flex-column min-vh-100 bg-black text-white">
-        <SiteAlertTicker />
         <Navbar
           onOpenAuth={handleOpenAuth}
           onOpenPassPortal={() => setShowPassModal(true)}

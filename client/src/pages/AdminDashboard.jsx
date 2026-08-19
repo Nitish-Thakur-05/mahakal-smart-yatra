@@ -386,14 +386,6 @@ export function AdminDashboard({ user, onOpenAuth }) {
       window.removeEventListener("mahakal_stats_updated", handleUpdate);
   }, []);
 
-  const [siteAlert, setSiteAlert] = useState({
-    message:
-      "🚩 OFFICIAL ANNOUNCEMENT: Shri Mahakaleshwar Temple Bhasma Aarti online booking for upcoming festival season is open. Please carry original Photo ID for entry.",
-    isActive: true,
-    alertType: "warning",
-    speed: 25,
-  });
-  const [savingAlert, setSavingAlert] = useState(false);
   const [activeTab, setActiveTab] = useState("analytics");
   const [roleFilter, setRoleFilter] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
@@ -437,7 +429,6 @@ export function AdminDashboard({ user, onOpenAuth }) {
         statsRes,
         usersRes,
         templesRes,
-        alertRes,
         noticesRes,
         ticketsRes,
         passAnalyticsRes,
@@ -447,7 +438,6 @@ export function AdminDashboard({ user, onOpenAuth }) {
         axios.get("/api/admin/stats"),
         axios.get("/api/admin/users"),
         axios.get("/api/temples"),
-        axios.get("/api/admin/alert"),
         axios.get("/api/announcements"),
         axios.get("/api/support/admin").catch(() => ({ data: [] })),
         axios.get("/api/passes/analytics").catch(() => ({ data: null })),
@@ -465,7 +455,6 @@ export function AdminDashboard({ user, onOpenAuth }) {
       }));
       setUsersList(cleanUsers);
       setTemplesList(templesRes.data || []);
-      if (alertRes.data) setSiteAlert(alertRes.data);
       setAdminNotices(Array.isArray(noticesRes.data) ? noticesRes.data : []);
       setSupportTickets(Array.isArray(ticketsRes.data) ? ticketsRes.data : []);
       if (passAnalyticsRes && passAnalyticsRes.data)
@@ -533,25 +522,6 @@ export function AdminDashboard({ user, onOpenAuth }) {
       fetchAdminData();
     } catch (err) {
       toast.error(err.response?.data?.error || "Failed to add shrine.");
-    }
-  };
-
-  const handleSaveSiteAlert = async (e) => {
-    e.preventDefault();
-    if (!siteAlert.message) {
-      toast.error("Alert message cannot be empty.");
-      return;
-    }
-    setSavingAlert(true);
-    try {
-      const res = await axios.post("/api/admin/alert", siteAlert);
-      toast.success("Website alert published!");
-      if (res.data.alert) setSiteAlert(res.data.alert);
-      window.dispatchEvent(new Event("site-alert-updated"));
-    } catch {
-      toast.error("Failed to update alert.");
-    } finally {
-      setSavingAlert(false);
     }
   };
 
@@ -2018,160 +1988,6 @@ export function AdminDashboard({ user, onOpenAuth }) {
         ============================ */}
         {activeTab === "alert" && (
           <div className="d-flex flex-column gap-4">
-            {/* Section 1: Header Marquee Alert */}
-            <div
-              className={`card bg-dark text-white p-4 p-md-5 ${styles.glassCard} border border-warning border-opacity-25`}
-            >
-              <div className="d-flex align-items-center gap-3 mb-4 pb-3 border-bottom border-warning border-opacity-20">
-                <div
-                  className="rounded-circle bg-warning text-dark d-flex align-items-center justify-content-center"
-                  style={{ width: 48, height: 48, flexShrink: 0 }}
-                >
-                  <Megaphone size={22} />
-                </div>
-                <div className="flex-grow-1">
-                  <h4
-                    className={`text-white fw-bold mb-1 ${styles.playfairFont}`}
-                  >
-                    Header Alert Banner
-                  </h4>
-                  <p className="text-secondary small mb-0">
-                    Scrolling announcement visible at top of all pages.
-                  </p>
-                </div>
-                <a
-                  href="/announcements"
-                  className="btn btn-outline-warning rounded-pill px-3 py-1.5 small d-flex align-items-center gap-2"
-                >
-                  <Eye size={14} /> View Notices Page
-                </a>
-              </div>
-
-              {/* Live Preview */}
-              <div className="mb-4">
-                <label className="form-label text-secondary small fw-semibold">
-                  LIVE PREVIEW
-                </label>
-                <div
-                  className="p-3 bg-black rounded-3 border border-warning border-opacity-30 overflow-hidden"
-                  style={{ height: 44 }}
-                >
-                  {siteAlert.isActive ? (
-                    <div
-                      className="text-warning fw-semibold small text-nowrap"
-                      style={{ animation: "marqueeScroll 20s linear infinite" }}
-                    >
-                      {siteAlert.message || "Type a message below..."}
-                    </div>
-                  ) : (
-                    <div className="text-secondary small text-center py-1">
-                      Alert is currently turned OFF.
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              <form onSubmit={handleSaveSiteAlert}>
-                <div className="row g-3">
-                  <div className="col-12">
-                    <label className="form-label text-secondary small fw-semibold">
-                      ANNOUNCEMENT MESSAGE
-                    </label>
-                    <textarea
-                      rows={3}
-                      className="form-control bg-black text-white border-secondary border-opacity-50 p-3"
-                      placeholder="e.g. 🚩 SPECIAL ANNOUNCEMENT: Bhasma Aarti online booking is now open..."
-                      value={siteAlert.message}
-                      onChange={(e) =>
-                        setSiteAlert({ ...siteAlert, message: e.target.value })
-                      }
-                      required
-                    />
-                  </div>
-
-                  <div className="col-md-4">
-                    <label className="form-label text-secondary small fw-semibold">
-                      DISPLAY
-                    </label>
-                    <div className="form-check form-switch d-flex align-items-center justify-content-between p-3 bg-black rounded-3 border border-secondary border-opacity-30">
-                      <label className="form-check-label text-white mb-0 small fw-semibold">
-                        {siteAlert.isActive ? "🟢 Active" : "🔴 Off"}
-                      </label>
-                      <input
-                        className="form-check-input"
-                        type="checkbox"
-                        checked={siteAlert.isActive}
-                        onChange={(e) =>
-                          setSiteAlert({
-                            ...siteAlert,
-                            isActive: e.target.checked,
-                          })
-                        }
-                        style={{
-                          width: "2.5em",
-                          height: "1.3em",
-                          cursor: "pointer",
-                        }}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="col-md-4">
-                    <label className="form-label text-secondary small fw-semibold">
-                      COLOR THEME
-                    </label>
-                    <select
-                      className="form-select bg-black text-white border-secondary border-opacity-50 p-2.5"
-                      value={siteAlert.alertType}
-                      onChange={(e) =>
-                        setSiteAlert({
-                          ...siteAlert,
-                          alertType: e.target.value,
-                        })
-                      }
-                    >
-                      <option value="warning">🚩 Saffron Gold</option>
-                      <option value="danger">🔴 Urgent Red</option>
-                      <option value="info">🔵 Blue Info</option>
-                      <option value="success">🟢 Emerald Green</option>
-                    </select>
-                  </div>
-
-                  <div className="col-md-4">
-                    <label className="form-label text-secondary small fw-semibold">
-                      SCROLL SPEED
-                    </label>
-                    <select
-                      className="form-select bg-black text-white border-secondary border-opacity-50 p-2.5"
-                      value={siteAlert.speed}
-                      onChange={(e) =>
-                        setSiteAlert({
-                          ...siteAlert,
-                          speed: Number(e.target.value),
-                        })
-                      }
-                    >
-                      <option value={18}>⚡ Fast</option>
-                      <option value={25}>Medium (Recommended)</option>
-                      <option value={35}>🐢 Slow</option>
-                    </select>
-                  </div>
-
-                  <div className="col-12 text-end pt-2 border-top border-secondary border-opacity-20">
-                    <button
-                      type="submit"
-                      disabled={savingAlert}
-                      className={`${styles.goldBtn} d-inline-flex align-items-center gap-2`}
-                      style={{ padding: "10px 28px" }}
-                    >
-                      <Save size={16} />
-                      {savingAlert ? "Publishing..." : "Publish Alert"}
-                    </button>
-                  </div>
-                </div>
-              </form>
-            </div>
-
             {/* Section 2: Post New Gate Notice */}
             <div
               className={`card bg-dark text-white p-4 p-md-5 ${styles.glassCard} border border-warning border-opacity-25`}
