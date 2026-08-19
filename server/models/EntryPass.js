@@ -53,6 +53,14 @@ const entryPassSchema = new mongoose.Schema({
     type: String, // e.g. "2026-08-15"
     required: false
   },
+  aartiId: {
+    type: String,
+    default: 'dadhodak'
+  },
+  aartiName: {
+    type: String,
+    default: 'Dadhodak Aarti (Naivedya Aarti)'
+  },
   entryTime: { 
     type: Date, 
     required: true 

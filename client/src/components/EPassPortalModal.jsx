@@ -83,11 +83,11 @@ export function EPassPortalModal({ show, onClose, user, onOpenAuth }) {
     setPassengers(updated);
   };
 
-  // Calculate next 5 available booking days (Today + 5 days max)
+  // Calculate next 30 available booking days (Today + 30 days max)
   const availableBookingDays = React.useMemo(() => {
     const days = [];
     const now = new Date();
-    for (let i = 0; i <= 5; i++) {
+    for (let i = 0; i <= 30; i++) {
       const d = new Date(now.getTime() + i * 24 * 60 * 60 * 1000);
       const isoStr = d.toISOString().substring(0, 10);
       const label = i === 0 ? "Today" : i === 1 ? "Tomorrow" : d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
@@ -97,9 +97,19 @@ export function EPassPortalModal({ show, onClose, user, onOpenAuth }) {
   }, []);
 
   const [bookingDate, setBookingDate] = useState(availableBookingDays[0].dateStr);
+  const [selectedAartiId, setSelectedAartiId] = useState("dadhodak");
+
+  const aartiOptions = [
+    { id: "bhasma", name: "Shri Mahakal Bhasma Aarti (04:00 AM - 06:00 AM)" },
+    { id: "dadhodak", name: "Dadhodak Aarti / Naivedya Aarti (07:30 AM - 08:15 AM)" },
+    { id: "bhog", name: "Shri Mahakal Bhog Aarti (10:30 AM - 11:30 AM)" },
+    { id: "sandhya", name: "Sandhya Aarti (05:00 PM - 06:00 PM)" },
+    { id: "shringar", name: "Sandhya Shringar Aarti (07:00 PM - 08:00 PM)" },
+    { id: "shayan", name: "Shri Mahakal Shayan Aarti (10:30 PM - 11:00 PM)" }
+  ];
 
   // Form submission handler
-  const handleSubmit = async (e) => {
+  const handleBookPass = async (e) => {
     e.preventDefault();
     if (!user) {
       toast.error("Please Sign In first to book a Darshan E-Pass");
@@ -108,16 +118,20 @@ export function EPassPortalModal({ show, onClose, user, onOpenAuth }) {
     }
     setLoading(true);
     try {
+      const matchedAarti = aartiOptions.find(a => a.id === selectedAartiId);
       const res = await axios.post("/api/passes/generate-epass", {
         primaryDevoteeName: primaryName,
         contactPhone,
         numberOfPersons: personCount,
         passengers,
+        bookingDate,
+        aartiId: selectedAartiId,
+        aartiName: matchedAarti?.name || "Dadhodak Aarti (Naivedya Aarti)",
         gateNumber: Math.floor(Math.random() * 4) + 1,
       });
 
       if (res.data.success) {
-        toast.success("Shri Mahakal Darshan E-Pass Generated Successfully! 🕉️");
+        toast.success(`Shri Mahakal Pass Issued for ${bookingDate}! 🕉️`);
         setGeneratedPass(res.data.pass);
       } else {
         toast.error(res.data.message || "Failed to generate E-Pass");
@@ -392,18 +406,34 @@ export function EPassPortalModal({ show, onClose, user, onOpenAuth }) {
                 onSubmit={handleBookPass}
                 className="space-y-3 max-w-lg mx-auto"
               >
-                {/* STEP 1: SELECT BOOKING DATE (NEXT 5 DAYS MAX) */}
-                <div className="mb-4">
+                {/* STEP 1: SELECT AARTI & BOOKING DATE (NEXT 30 DAYS MAX) */}
+                <div className="mb-3">
                   <label className="form-label text-warning fw-bold small mb-1.5 d-flex align-items-center gap-2">
-                    <Calendar size={16} className="text-warning" /> Select Booking Date
+                    <Ticket size={16} className="text-warning" /> Select Aarti Ceremony
+                  </label>
+                  <select
+                    className="form-select bg-black text-warning border border-secondary border-opacity-40 py-2 px-3 rounded-3 fw-bold shadow-sm mb-3"
+                    value={selectedAartiId}
+                    onChange={(e) => setSelectedAartiId(e.target.value)}
+                    style={{ fontSize: "0.88rem", cursor: "pointer" }}
+                  >
+                    {aartiOptions.map(a => (
+                      <option key={a.id} value={a.id} className="bg-dark text-white">
+                        {a.name}
+                      </option>
+                    ))}
+                  </select>
+
+                  <label className="form-label text-warning fw-bold small mb-1.5 d-flex align-items-center gap-2">
+                    <Calendar size={16} className="text-warning" /> Select Booking Date (1 Month Advance Booking)
                   </label>
                   
-                  <div className="position-relative">
+                  <div className="d-flex gap-2">
                     <select
-                      className="form-select bg-black text-warning border border-secondary border-opacity-40 py-2.5 px-3 rounded-3 fw-bold shadow-sm"
+                      className="form-select bg-black text-warning border border-secondary border-opacity-40 py-2 px-3 rounded-3 fw-bold shadow-sm flex-grow-1"
                       value={bookingDate}
                       onChange={(e) => setBookingDate(e.target.value)}
-                      style={{ fontSize: "0.92rem", cursor: "pointer" }}
+                      style={{ fontSize: "0.88rem", cursor: "pointer" }}
                     >
                       {availableBookingDays.map((d) => (
                         <option key={d.dateStr} value={d.dateStr} className="bg-dark text-white">
@@ -411,6 +441,16 @@ export function EPassPortalModal({ show, onClose, user, onOpenAuth }) {
                         </option>
                       ))}
                     </select>
+
+                    <input
+                      type="date"
+                      className="form-control bg-black text-warning border border-secondary border-opacity-40 py-2 px-3 rounded-3 fw-bold"
+                      style={{ width: "160px", fontSize: "0.85rem", colorScheme: "dark" }}
+                      value={bookingDate}
+                      min={new Date().toISOString().substring(0, 10)}
+                      max={new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().substring(0, 10)}
+                      onChange={(e) => setBookingDate(e.target.value)}
+                    />
                   </div>
                 </div>
 

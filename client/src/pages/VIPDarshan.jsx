@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import axios from "axios";
 import {
   Crown,
   Sparkles,
@@ -172,13 +173,12 @@ export function VIPDarshan({ user, onOpenAuth }) {
     setIsRazorpayOpen(true);
   };
 
-  const handlePaymentSuccess = (paymentDetails) => {
+  const handlePaymentSuccess = async (paymentDetails) => {
     setIsRazorpayOpen(false);
 
     const ticketRef = `VIP-MAHAKAL-${Math.floor(100000 + Math.random() * 900000)}`;
-    const totalAmount =
-      selectedPkg.price *
-      (selectedPkg.id === "royal-nri-protocol" ? 1 : devoteeCount);
+    const passesCount = Number(devoteeCount) || 1;
+    const totalAmount = selectedPkg.price * passesCount;
 
     const ticketData = {
       ticketId: ticketRef,
@@ -188,7 +188,7 @@ export function VIPDarshan({ user, onOpenAuth }) {
       gate: selectedPkg.gate,
       date: bookingDate,
       timeSlot: selectedSlot,
-      devoteeCount: selectedPkg.id === "royal-nri-protocol" ? 4 : devoteeCount,
+      devoteeCount: passesCount,
       primaryName,
       primaryEmail,
       primaryPhone,
@@ -201,7 +201,26 @@ export function VIPDarshan({ user, onOpenAuth }) {
       bookedAt: new Date().toISOString(),
     };
 
-    // Save ticket to localStorage for user persistence
+    // Post VIP booking to MongoDB backend 'viptickets' collection
+    try {
+      await axios.post("/api/passes/book-vip-ticket", {
+        bookingDate,
+        pkgId: selectedPkg.id,
+        pkgName: selectedPkg.name,
+        passesCount,
+        pricePerPass: selectedPkg.price,
+        totalAmount,
+        primaryName,
+        primaryEmail,
+        primaryPhone,
+        timeSlot: selectedSlot,
+        gateName: selectedPkg.gate
+      });
+    } catch (err) {
+      console.error("Failed to sync VIP booking to MongoDB:", err);
+    }
+
+    // Save ticket to localStorage for user profile persistence
     const userStorageKey = `mahakal_vip_tickets_${user?.email || "guest"}`;
     const existing = JSON.parse(localStorage.getItem(userStorageKey) || "[]");
     const updated = [ticketData, ...existing];
@@ -209,14 +228,14 @@ export function VIPDarshan({ user, onOpenAuth }) {
 
     // Record dynamic VIP analytics for Admin Dashboard
     if (selectedPkg) {
-      recordVipBooking(bookingDate, selectedPkg.name, selectedPkg.price, selectedPkg.id === "royal-nri-protocol" ? 1 : devoteeCount);
+      recordVipBooking(bookingDate, selectedPkg.name, selectedPkg.price, passesCount);
     }
 
-    // Also trigger custom event so profile or other components update instantly
+    // Trigger custom event for real-time UI updates
     window.dispatchEvent(new Event("vip-ticket-booked"));
 
     setIssuedTicket(ticketData);
-    toast.success(`VIP Darshan Ticket ${ticketRef} issued successfully!`);
+    toast.success(`VIP Darshan Ticket ${ticketRef} issued for ${bookingDate}! 👑`);
   };
 
   return (

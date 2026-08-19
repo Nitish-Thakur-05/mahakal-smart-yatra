@@ -1,12 +1,13 @@
-const { GoogleGenerativeAI } = require('@google/generative-ai');
+const { GoogleGenerativeAI } = require("@google/generative-ai");
 const {
   forecastCache,
   CACHE_TTL_MS,
   getDynamicCrowdDataset,
-  getCrowdLevel
-} = require('./crowdDataset');
+  getCrowdLevel,
+} = require("./crowdDataset");
 
-const PYTHON_AI_SERVICE_URL = process.env.CHRONOS_AI_URL || 'http://127.0.0.1:8000';
+const PYTHON_AI_SERVICE_URL =
+  process.env.CHRONOS_AI_URL || "http://127.0.0.1:8000";
 
 /**
  * Fetch Chronos-2 / Google Gemini AI Crowd Forecast for Admin Dashboard
@@ -27,7 +28,8 @@ async function fetchChronosForecast(forceRefresh = false) {
   }
 
   // 1. Fetch real active booking dataset from MongoDB
-  const { series, realTotalPersons, totalPassCount } = await getDynamicCrowdDataset();
+  const { series, realTotalPersons, totalPassCount } =
+    await getDynamicCrowdDataset();
 
   // 2. TIER 1: Try Local Python Chronos-2 Microservice (if running)
   try {
@@ -35,13 +37,13 @@ async function fetchChronosForecast(forceRefresh = false) {
     const timeoutId = setTimeout(() => controller.abort(), 2000); // 2s quick probe
 
     const response = await fetch(`${PYTHON_AI_SERVICE_URL}/predict`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         history: series,
-        prediction_length: 168
+        prediction_length: 168,
       }),
-      signal: controller.signal
+      signal: controller.signal,
     });
 
     clearTimeout(timeoutId);
@@ -51,12 +53,14 @@ async function fetchChronosForecast(forceRefresh = false) {
       console.log("✅ Using Python Chronos-2 AI prediction.");
       const result = {
         aiAvailable: true,
-        aiModel: forecast.aiModel || 'amazon/chronos-2 (Local Microservice)',
+        aiModel: forecast.aiModel || "amazon/chronos-2 (Local Microservice)",
         tomorrow: forecast.tomorrow,
         upcomingDays: forecast.upcomingDays,
         hourlyTomorrow: forecast.hourlyTomorrow,
-        aiInsights: forecast.aiInsights || "Chronos-2 time-series forecast based on active database bookings.",
-        generatedAt: new Date().toISOString()
+        aiInsights:
+          forecast.aiInsights ||
+          "Chronos-2 time-series forecast based on active database bookings.",
+        generatedAt: new Date().toISOString(),
       };
       cacheResult(now, result);
       return { ...result, fromCache: false };
@@ -67,16 +71,21 @@ async function fetchChronosForecast(forceRefresh = false) {
 
   // 3. TIER 2: Primary Google Gemini AI Engine driven by real MongoDB telemetry
   try {
-    const apiKey = process.env.GEMINI_API_KEY || process.env.VITE_GEMINI_API_KEY;
+    const apiKey =
+      process.env.GEMINI_API_KEY || process.env.VITE_GEMINI_API_KEY;
     if (!apiKey) {
       throw new Error("No GEMINI_API_KEY found in server environment.");
     }
 
-    console.log(`🧠 Invoking Google Gemini AI Engine with Real DB Telemetry (${realTotalPersons} devotees)...`);
+    console.log(
+      `🧠 Invoking Google Gemini AI Engine with Real DB Telemetry (${realTotalPersons} devotees)...`,
+    );
     const genAI = new GoogleGenerativeAI(apiKey);
-    
+
     const tomorrowDt = new Date(now + 24 * 60 * 60 * 1000);
-    const tomorrowDayName = tomorrowDt.toLocaleDateString('en-US', { weekday: 'long' });
+    const tomorrowDayName = tomorrowDt.toLocaleDateString("en-US", {
+      weekday: "long",
+    });
 
     const prompt = `You are the AI Crowd Prediction & Analytics Engine for Shri Mahakaleshwar Temple, Ujjain.
 
@@ -107,7 +116,12 @@ Return ONLY a valid JSON object matching EXACTLY this structure:
 }`;
 
     // Model fallback list to avoid 404 version issues
-    const modelCandidates = ["gemini-1.5-flash-latest", "gemini-pro", "gemini-1.5-flash", "gemini-2.0-flash"];
+    const modelCandidates = [
+      "gemini-1.5-flash-latest",
+      "gemini-pro",
+      "gemini-1.5-flash",
+      "gemini-2.0-flash",
+    ];
     let result = null;
     let lastError = null;
 
@@ -115,7 +129,7 @@ Return ONLY a valid JSON object matching EXACTLY this structure:
       try {
         const model = genAI.getGenerativeModel({
           model: modelName,
-          generationConfig: { responseMimeType: "application/json" }
+          generationConfig: { responseMimeType: "application/json" },
         });
         result = await model.generateContent(prompt);
         if (result && result.response) break;
@@ -125,15 +139,23 @@ Return ONLY a valid JSON object matching EXACTLY this structure:
     }
 
     if (!result || !result.response) {
-      throw lastError || new Error("Failed to get response from Gemini model candidates");
+      throw (
+        lastError ||
+        new Error("Failed to get response from Gemini model candidates")
+      );
     }
 
     const responseText = result.response.text();
     const geminiJson = JSON.parse(responseText);
 
     const baseCount = Math.max(10, realTotalPersons);
-    const expectedCrowd = geminiJson.expectedCrowd || Math.round(baseCount * 1.15);
-    const formattedDate = tomorrowDt.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
+    const expectedCrowd =
+      geminiJson.expectedCrowd || Math.round(baseCount * 1.15);
+    const formattedDate = tomorrowDt.toLocaleDateString("en-US", {
+      weekday: "long",
+      month: "short",
+      day: "numeric",
+    });
 
     const formattedForecast = {
       aiAvailable: true,
@@ -144,24 +166,33 @@ Return ONLY a valid JSON object matching EXACTLY this structure:
         expectedCrowd,
         crowdLevel: getCrowdLevel(expectedCrowd),
         peakHour: geminiJson.peakHour || "11:00 AM",
-        peakCrowd: geminiJson.peakCrowd || Math.max(2, Math.round(expectedCrowd * 0.20))
+        peakCrowd:
+          geminiJson.peakCrowd || Math.max(2, Math.round(expectedCrowd * 0.2)),
       },
-      upcomingDays: geminiJson.upcomingDays || generateRealUpcomingDays(now, baseCount),
-      hourlyTomorrow: geminiJson.hourlyTomorrow || generateRealHourlyTomorrow(expectedCrowd),
-      aiInsights: geminiJson.aiInsights || `Gemini AI telemetry analysis of ${realTotalPersons} active MongoDB pass bookings predicts smooth visitor flow with LOW crowd risk.`,
-      generatedAt: new Date().toISOString()
+      upcomingDays:
+        geminiJson.upcomingDays || generateRealUpcomingDays(now, baseCount),
+      hourlyTomorrow:
+        geminiJson.hourlyTomorrow || generateRealHourlyTomorrow(expectedCrowd),
+      aiInsights:
+        geminiJson.aiInsights ||
+        `Gemini AI telemetry analysis of ${realTotalPersons} active MongoDB pass bookings predicts smooth visitor flow with LOW crowd risk.`,
+      generatedAt: new Date().toISOString(),
     };
 
     console.log("⚡ Gemini AI Real Forecast generated successfully!");
     cacheResult(now, formattedForecast);
     return { ...formattedForecast, fromCache: false };
-
   } catch (geminiErr) {
-    console.warn(`⚠️ Gemini AI Note (${geminiErr.message}). Using dynamic MongoDB telemetry regression.`);
+    console.warn(
+      `⚠️ Gemini AI Note (${geminiErr.message}). Using dynamic MongoDB telemetry regression.`,
+    );
   }
 
   // 4. TIER 3: Dynamic MongoDB Telemetry Regression Fallback
-  const dynamicForecast = generateDynamicRegressionForecast(now, realTotalPersons);
+  const dynamicForecast = generateDynamicRegressionForecast(
+    now,
+    realTotalPersons,
+  );
   cacheResult(now, dynamicForecast);
   return { ...dynamicForecast, fromCache: false };
 }
@@ -184,7 +215,7 @@ function generateDynamicRegressionForecast(now, realTotalPersons) {
   const dayMult = dayMultipliers[dayOfWeek] || 1.1;
 
   const expectedCrowd = Math.round(baseCount * dayMult);
-  const peakCrowd = Math.max(2, Math.round(expectedCrowd * 0.20));
+  const peakCrowd = Math.max(2, Math.round(expectedCrowd * 0.2));
   const peakHour = dayOfWeek === 1 ? "04:00 AM" : "11:00 AM";
 
   const hourlyTomorrow = generateRealHourlyTomorrow(expectedCrowd);
@@ -195,21 +226,33 @@ function generateDynamicRegressionForecast(now, realTotalPersons) {
     aiModel: `MongoDB Booking Telemetry AI Regression (${realTotalPersons} Active Devotees)`,
     tomorrow: {
       date: tomorrowDt.toISOString().substring(0, 10),
-      formattedDate: tomorrowDt.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' }),
+      formattedDate: tomorrowDt.toLocaleDateString("en-US", {
+        weekday: "long",
+        month: "short",
+        day: "numeric",
+      }),
       expectedCrowd,
       crowdLevel: getCrowdLevel(expectedCrowd),
       peakHour,
-      peakCrowd
+      peakCrowd,
     },
     upcomingDays,
     hourlyTomorrow,
     aiInsights: `Real MongoDB telemetry of ${realTotalPersons} active pass bookings predicts tomorrow's peak daily footfall at ${expectedCrowd} devotees with LOW crowd risk.`,
-    generatedAt: new Date().toISOString()
+    generatedAt: new Date().toISOString(),
   };
 }
 
 function generateRealUpcomingDays(now, baseCount) {
-  const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  const dayNames = [
+    "Sunday",
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday",
+    "Saturday",
+  ];
   const dayMultipliers = [1.2, 1.4, 1.0, 1.05, 1.1, 1.15, 1.25];
   const list = [];
 
@@ -222,7 +265,7 @@ function generateRealUpcomingDays(now, baseCount) {
       date: nextDt.toISOString().substring(0, 10),
       day: dayNames[dow],
       expectedCrowd: estCrowd,
-      crowdLevel: getCrowdLevel(estCrowd)
+      crowdLevel: getCrowdLevel(estCrowd),
     });
   }
   return list;
@@ -230,19 +273,26 @@ function generateRealUpcomingDays(now, baseCount) {
 
 function generateRealHourlyTomorrow(totalCrowd) {
   const hourlyTemplate = [
-    0.02, 0.01, 0.01, 0.08, 0.18, 0.12, 0.09, 0.08, 0.11, 0.12, 0.10, 0.08,
-    0.06, 0.05, 0.04, 0.05, 0.08, 0.12, 0.14, 0.09, 0.06, 0.04, 0.02, 0.01
+    0.02, 0.01, 0.01, 0.08, 0.18, 0.12, 0.09, 0.08, 0.11, 0.12, 0.1, 0.08, 0.06,
+    0.05, 0.04, 0.05, 0.08, 0.12, 0.14, 0.09, 0.06, 0.04, 0.02, 0.01,
   ];
   return Array.from({ length: 24 }, (_, h) => {
-    const hourLabel = h === 0 ? "12 AM" : h < 12 ? `${h} AM` : h === 12 ? "12 PM" : `${h - 12} PM`;
+    const hourLabel =
+      h === 0
+        ? "12 AM"
+        : h < 12
+          ? `${h} AM`
+          : h === 12
+            ? "12 PM"
+            : `${h - 12} PM`;
     return {
       hourLabel,
       hour24: h,
-      predictedCrowd: Math.round(totalCrowd * hourlyTemplate[h])
+      predictedCrowd: Math.round(totalCrowd * hourlyTemplate[h]),
     };
   });
 }
 
 module.exports = {
-  fetchChronosForecast
+  fetchChronosForecast,
 };

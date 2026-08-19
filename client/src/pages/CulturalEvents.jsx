@@ -229,6 +229,7 @@ const SIX_OFFICIAL_AARTIS = [
 export function CulturalEvents({ events, user, onOpenAuth }) {
   const [selectedAarti, setSelectedAarti] = useState(null);
   const [bookingModalAarti, setBookingModalAarti] = useState(null);
+  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().substring(0, 10));
   const [ticketsCount, setTicketsCount] = useState(1);
   const [userName, setUserName] = useState(user?.name || "");
   const [userEmail, setUserEmail] = useState(user?.email || "");
@@ -282,9 +283,40 @@ export function CulturalEvents({ events, user, onOpenAuth }) {
     setIsRazorpayOpen(true);
   };
 
-  const handlePaymentSuccess = (paymentDetails) => {
+  const handlePaymentSuccess = async (paymentDetails) => {
     setIsRazorpayOpen(false);
-    toast.success(`Aarti Pass for ${bookingModalAarti?.nameEn || 'Sacred Aarti'} issued successfully!`);
+    try {
+      // Save pass booking in MongoDB database
+      const aartiKeyMap = {
+        'bhasma-aarti': 'bhasma',
+        'dadhodak-aarti': 'dadhodak',
+        'bhog-aarti': 'bhog',
+        'sandhya-aarti': 'sandhya',
+        'shringar-aarti': 'shringar',
+        'shayan-aarti': 'shayan'
+      };
+      const aartiIdKey = aartiKeyMap[bookingModalAarti?.id] || 'dadhodak';
+
+      await axios.post("/api/passes/generate-epass", {
+        primaryDevoteeName: userName || user?.name || "Devotee",
+        contactPhone: "9876543210",
+        numberOfPersons: ticketsCount,
+        passengers: Array.from({ length: ticketsCount }, (_, i) => ({
+          name: i === 0 ? (userName || user?.name || "Devotee") : `Devotee ${i + 1}`,
+          age: 30,
+          gender: "Other",
+          idProof: "Aadhaar Card"
+        })),
+        bookingDate: selectedDate,
+        aartiId: aartiIdKey,
+        aartiName: bookingModalAarti?.nameEn || "Dadhodak Aarti (Naivedya Aarti)",
+        gateNumber: 4
+      });
+    } catch (err) {
+      console.error("Failed to sync booking to backend DB:", err);
+    }
+
+    toast.success(`Aarti Pass for ${bookingModalAarti?.nameEn || 'Sacred Aarti'} issued for ${selectedDate}! 🕉️`);
     if (bookingModalAarti) {
       recordAartiBooking(bookingModalAarti.id || bookingModalAarti.nameEn, ticketsCount);
       bookingModalAarti.seatsLeft = Math.max(0, bookingModalAarti.seatsLeft - ticketsCount);
@@ -730,6 +762,25 @@ export function CulturalEvents({ events, user, onOpenAuth }) {
                           onChange={(e) => setUserName(e.target.value)}
                         />
                       </div>
+                    </div>
+
+                    <div className="mb-3">
+                      <label className="form-label text-warning fw-bold small d-flex align-items-center gap-2">
+                        <Calendar size={16} /> Select Booking Date (1 Month Advance Booking)
+                      </label>
+                      <input
+                        type="date"
+                        className="form-control bg-dark text-warning border-warning border-opacity-50 font-monospace fw-bold"
+                        value={selectedDate}
+                        min={new Date().toISOString().substring(0, 10)}
+                        max={new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().substring(0, 10)}
+                        onChange={(e) => setSelectedDate(e.target.value)}
+                        style={{ colorScheme: "dark" }}
+                        required
+                      />
+                      <small className="text-secondary d-block mt-1" style={{ fontSize: "0.75rem" }}>
+                        You can book Aarti passes up to 30 days (1 month) in advance.
+                      </small>
                     </div>
 
                     <div className="mb-3">

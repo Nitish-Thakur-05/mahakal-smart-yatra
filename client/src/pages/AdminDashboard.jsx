@@ -1150,10 +1150,8 @@ export function AdminDashboard({ user, onOpenAuth }) {
                       colorScheme: "dark"
                     }}
                     value={selectedCalendarDate}
-                    max={new Date().toISOString().substring(0, 10)}
-                    min={new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().substring(0, 10)}
                     onChange={(e) => handleDateSelect(e.target.value)}
-                    title="Click to open calendar and choose any date from past month"
+                    title="Click to open calendar and select any date (past or future)"
                   />
                 </div>
               </div>
@@ -1246,10 +1244,8 @@ export function AdminDashboard({ user, onOpenAuth }) {
                       colorScheme: "dark"
                     }}
                     value={selectedCalendarDate}
-                    max={new Date().toISOString().substring(0, 10)}
-                    min={new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().substring(0, 10)}
                     onChange={(e) => handleDateSelect(e.target.value)}
-                    title="Click to open calendar and choose any date from past month"
+                    title="Click to open calendar and select any date (past or future)"
                   />
                 </div>
               </div>
