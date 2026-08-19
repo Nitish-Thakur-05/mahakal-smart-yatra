@@ -6,6 +6,24 @@ const AartiTicket = require("../models/AartiTicket");
 const VipTicket = require("../models/VipTicket");
 const { authenticateToken } = require("../middleware/auth");
 const { invalidateCrowdCache } = require("../services/crowdDataset");
+const { sendETicketEmail } = require("../services/emailService");
+const jwt = require("jsonwebtoken");
+const JWT_SECRET = process.env.JWT_SECRET || "mahakal_jwt_secret_key_2026";
+
+function optionalAuth(req, res, next) {
+  const authHeader = req.headers["authorization"];
+  const token = authHeader && authHeader.split(" ")[1];
+  if (token) {
+    jwt.verify(token, JWT_SECRET, (err, user) => {
+      if (!err && user) {
+        req.user = user;
+      }
+      next();
+    });
+  } else {
+    next();
+  }
+}
 
 // Gates configuration & details
 const GATE_CONFIG = {
@@ -252,6 +270,29 @@ const handleBookPassRequest = async (req, res) => {
     // Invalidate Chronos-2 AI Crowd forecast cache to trigger dynamic re-forecasting
     invalidateCrowdCache();
 
+    // Auto-send official E-Ticket HTML email to devotee
+    const targetEmail = req.body.primaryEmail || req.body.email || (req.user && req.user.email) || "";
+    if (targetEmail) {
+      try {
+        await sendETicketEmail({
+          toEmail: targetEmail,
+          ticketType: aartiName ? `OFFICIAL MAHAKAL AARTI PASS` : "OFFICIAL MAHAKAL DARSHAN E-PASS",
+          ticketDetails: {
+            passId: generatedPassId,
+            primaryName: primaryDevoteeName,
+            contactPhone,
+            bookingDate: targetBookingDateStr,
+            aartiName: aartiName || "Shri Mahakal General Darshan Pass",
+            gateName: gate.name,
+            gateNumber: gate.number,
+            numberOfPersons: devoteesList.length,
+          },
+        });
+      } catch (eErr) {
+        console.error("Pass email dispatch error:", eErr.message);
+      }
+    }
+
     const formattedBookingDateStr = selectedBookingDate.toLocaleDateString(
       "en-US",
       { weekday: "short", month: "short", day: "numeric" },
@@ -273,11 +314,11 @@ const handleBookPassRequest = async (req, res) => {
 };
 
 // Register both /book and /generate-epass routes for seamless frontend integration
-router.post("/book", handleBookPassRequest);
-router.post("/generate-epass", handleBookPassRequest);
+router.post("/book", optionalAuth, handleBookPassRequest);
+router.post("/generate-epass", optionalAuth, handleBookPassRequest);
 
 // POST /api/passes/book-vip-ticket - Book VIP Darshan Ticket into 'viptickets' MongoDB collection
-router.post("/book-vip-ticket", async (req, res) => {
+router.post("/book-vip-ticket", optionalAuth, async (req, res) => {
   try {
     const {
       bookingDate,
@@ -316,6 +357,26 @@ router.post("/book-vip-ticket", async (req, res) => {
     });
 
     console.log(`👑 Saved VipTicket in 'viptickets' collection for ${targetDateStr} (${pkgName}, ${count} pass)!`);
+
+    // Auto-send official VIP E-Ticket email to devotee
+    const targetVipEmail = primaryEmail || (req.user && req.user.email) || "";
+    if (targetVipEmail) {
+      sendETicketEmail({
+        toEmail: targetVipEmail,
+        ticketType: "VIP PROTOCOL DARSHAN PASS",
+        ticketDetails: {
+          passId: ticketObj.ticketId,
+          primaryName: primaryName || "Devotee",
+          contactPhone: primaryPhone,
+          bookingDate: targetDateStr,
+          timeSlot,
+          gateName: gateName || "Gate 4",
+          gateNumber,
+          numberOfPersons: count,
+          totalAmount: totalAmount || (count * (pricePerPass || 250)),
+        },
+      });
+    }
 
     res.json({
       success: true,
@@ -397,10 +458,16 @@ setTimeout(seedInitialVipTickets, 1500);
 router.get("/my-passes", authenticateToken, async (req, res) => {
   try {
     const userId = req.user.userId;
+    const email = req.user.email;
+    const name = req.user.name;
+
     let passes = [];
     if (mongoose.connection.readyState === 1) {
       try {
-        passes = await EntryPass.find({ userId }).sort({ createdAt: -1 });
+        const queryConditions = [{ userId }];
+        if (email) queryConditions.push({ userEmail: email });
+        if (name) queryConditions.push({ primaryDevoteeName: name });
+        passes = await EntryPass.find({ $or: queryConditions }).sort({ createdAt: -1 });
       } catch (err) {
         passes = [];
       }
@@ -440,6 +507,30 @@ router.get("/my-passes", authenticateToken, async (req, res) => {
   } catch (err) {
     console.error("Fetch passes error:", err);
     res.status(500).json({ error: "Failed to load entry passes." });
+  }
+});
+
+// GET /api/passes/my-vip-tickets - Get VIP tickets for current logged-in user
+router.get("/my-vip-tickets", authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const email = req.user.email;
+    const name = req.user.name;
+
+    let vipTickets = [];
+    if (mongoose.connection.readyState === 1) {
+      try {
+        const queryConditions = [{ userId }];
+        if (email) queryConditions.push({ primaryEmail: email });
+        if (name) queryConditions.push({ primaryName: name });
+        vipTickets = await VipTicket.find({ $or: queryConditions }).sort({ createdAt: -1 });
+      } catch (err) {
+        vipTickets = [];
+      }
+    }
+    res.json({ vipTickets });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to load VIP tickets." });
   }
 });
 

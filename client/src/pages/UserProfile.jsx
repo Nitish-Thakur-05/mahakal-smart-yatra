@@ -297,19 +297,52 @@ export function UserProfile({ user, onOpenAuth, onUpdateUser }) {
 
   const fetchEntryPasses = async () => {
     if (!user) return;
+    let apiPasses = [];
     try {
       const res = await axios.get("/api/passes/my-passes");
-      setEntryPasses(res.data.passes || []);
+      apiPasses = res.data.passes || [];
     } catch (err) {
-      // Silently fail
+      apiPasses = [];
     }
+
+    const userKey = `mahakal_entry_passes_${user.email}`;
+    const guestKey = `mahakal_entry_passes_guest`;
+    const savedUserPasses = JSON.parse(localStorage.getItem(userKey) || "[]");
+    const savedGuestPasses = JSON.parse(localStorage.getItem(guestKey) || "[]");
+
+    const passMap = new Map();
+    [...apiPasses, ...savedUserPasses, ...savedGuestPasses].forEach((p) => {
+      const idKey = p._id || p.passId || p.ticketId;
+      if (idKey && !passMap.has(idKey)) {
+        passMap.set(idKey, p);
+      }
+    });
+    setEntryPasses(Array.from(passMap.values()));
   };
 
-  const loadVipTickets = () => {
+  const loadVipTickets = async () => {
     if (!user) return;
-    const userStorageKey = `mahakal_vip_tickets_${user.email}`;
-    const saved = JSON.parse(localStorage.getItem(userStorageKey) || "[]");
-    setVipTickets(saved);
+    const userKey = `mahakal_vip_tickets_${user.email}`;
+    const guestKey = `mahakal_vip_tickets_guest`;
+    const savedUserVip = JSON.parse(localStorage.getItem(userKey) || "[]");
+    const savedGuestVip = JSON.parse(localStorage.getItem(guestKey) || "[]");
+
+    let apiVip = [];
+    try {
+      const res = await axios.get("/api/passes/my-vip-tickets");
+      apiVip = res.data.vipTickets || [];
+    } catch (e) {
+      apiVip = [];
+    }
+
+    const vipMap = new Map();
+    [...apiVip, ...savedUserVip, ...savedGuestVip].forEach((v) => {
+      const idKey = v._id || v.ticketId;
+      if (idKey && !vipMap.has(idKey)) {
+        vipMap.set(idKey, v);
+      }
+    });
+    setVipTickets(Array.from(vipMap.values()));
   };
 
   useEffect(() => {
@@ -319,10 +352,17 @@ export function UserProfile({ user, onOpenAuth, onUpdateUser }) {
       fetchEntryPasses();
     }
 
-    const handleTicketBooked = () => loadVipTickets();
+    const handleTicketBooked = () => {
+      loadVipTickets();
+      fetchEntryPasses();
+      fetchBookings();
+    };
     window.addEventListener("vip-ticket-booked", handleTicketBooked);
-    return () =>
+    window.addEventListener("mahakal-booking-success", handleTicketBooked);
+    return () => {
       window.removeEventListener("vip-ticket-booked", handleTicketBooked);
+      window.removeEventListener("mahakal-booking-success", handleTicketBooked);
+    };
   }, [user]);
 
   const handleCancelBooking = async (bookingId) => {

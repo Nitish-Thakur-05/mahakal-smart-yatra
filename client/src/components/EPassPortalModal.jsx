@@ -97,20 +97,9 @@ export function EPassPortalModal({ show, onClose, user, onOpenAuth }) {
   }, []);
 
   const [bookingDate, setBookingDate] = useState(availableBookingDays[0].dateStr);
-  const [selectedAartiId, setSelectedAartiId] = useState("dadhodak");
-
-  const aartiOptions = [
-    { id: "bhasma", name: "Shri Mahakal Bhasma Aarti (04:00 AM - 06:00 AM)" },
-    { id: "dadhodak", name: "Dadhodak Aarti / Naivedya Aarti (07:30 AM - 08:15 AM)" },
-    { id: "bhog", name: "Shri Mahakal Bhog Aarti (10:30 AM - 11:30 AM)" },
-    { id: "sandhya", name: "Sandhya Aarti (05:00 PM - 06:00 PM)" },
-    { id: "shringar", name: "Sandhya Shringar Aarti (07:00 PM - 08:00 PM)" },
-    { id: "shayan", name: "Shri Mahakal Shayan Aarti (10:30 PM - 11:00 PM)" }
-  ];
-
   // Form submission handler
   const handleBookPass = async (e) => {
-    e.preventDefault();
+    if (e) e.preventDefault();
     if (!user) {
       toast.error("Please Sign In first to book a Darshan E-Pass");
       if (onOpenAuth) onOpenAuth();
@@ -118,21 +107,30 @@ export function EPassPortalModal({ show, onClose, user, onOpenAuth }) {
     }
     setLoading(true);
     try {
-      const matchedAarti = aartiOptions.find(a => a.id === selectedAartiId);
       const res = await axios.post("/api/passes/generate-epass", {
         primaryDevoteeName: primaryName,
+        primaryEmail: user?.email || "",
         contactPhone,
         numberOfPersons: personCount,
         passengers,
         bookingDate,
-        aartiId: selectedAartiId,
-        aartiName: matchedAarti?.name || "Dadhodak Aarti (Naivedya Aarti)",
+        aartiId: "general",
+        aartiName: "Shri Mahakal General Darshan Pass",
         gateNumber: Math.floor(Math.random() * 4) + 1,
       });
 
-      if (res.data.success) {
+      if (res.data.success && res.data.pass) {
         toast.success(`Shri Mahakal Pass Issued for ${bookingDate}! 🕉️`);
         setGeneratedPass(res.data.pass);
+
+        // Save to localStorage for instant user profile persistence
+        const userStorageKey = `mahakal_entry_passes_${user?.email || "guest"}`;
+        const existing = JSON.parse(localStorage.getItem(userStorageKey) || "[]");
+        const updated = [res.data.pass, ...existing];
+        localStorage.setItem(userStorageKey, JSON.stringify(updated));
+
+        // Trigger real-time event for UserProfile refresh
+        window.dispatchEvent(new Event("mahakal-booking-success"));
       } else {
         toast.error(res.data.message || "Failed to generate E-Pass");
       }
@@ -406,24 +404,8 @@ export function EPassPortalModal({ show, onClose, user, onOpenAuth }) {
                 onSubmit={handleBookPass}
                 className="space-y-3 max-w-lg mx-auto"
               >
-                {/* STEP 1: SELECT AARTI & BOOKING DATE (NEXT 30 DAYS MAX) */}
+                {/* STEP 1: SELECT BOOKING DATE (NEXT 30 DAYS MAX) */}
                 <div className="mb-3">
-                  <label className="form-label text-warning fw-bold small mb-1.5 d-flex align-items-center gap-2">
-                    <Ticket size={16} className="text-warning" /> Select Aarti Ceremony
-                  </label>
-                  <select
-                    className="form-select bg-black text-warning border border-secondary border-opacity-40 py-2 px-3 rounded-3 fw-bold shadow-sm mb-3"
-                    value={selectedAartiId}
-                    onChange={(e) => setSelectedAartiId(e.target.value)}
-                    style={{ fontSize: "0.88rem", cursor: "pointer" }}
-                  >
-                    {aartiOptions.map(a => (
-                      <option key={a.id} value={a.id} className="bg-dark text-white">
-                        {a.name}
-                      </option>
-                    ))}
-                  </select>
-
                   <label className="form-label text-warning fw-bold small mb-1.5 d-flex align-items-center gap-2">
                     <Calendar size={16} className="text-warning" /> Select Booking Date (1 Month Advance Booking)
                   </label>

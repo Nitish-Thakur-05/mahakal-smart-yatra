@@ -138,6 +138,7 @@ export function EntryPassPage({ user, onOpenAuth }) {
     try {
       const res = await axios.post("/api/passes/book", {
         primaryDevoteeName: primaryName,
+        primaryEmail: user?.email || "",
         contactPhone,
         passengers,
         bookingDate
@@ -147,6 +148,14 @@ export function EntryPassPage({ user, onOpenAuth }) {
       fetchMyPasses();
       setActiveTab("my-passes");
       setSelectedPassForQR(res.data.pass);
+
+      if (res.data.pass) {
+        const userStorageKey = `mahakal_entry_passes_${user?.email || "guest"}`;
+        const existing = JSON.parse(localStorage.getItem(userStorageKey) || "[]");
+        const updated = [res.data.pass, ...existing];
+        localStorage.setItem(userStorageKey, JSON.stringify(updated));
+        window.dispatchEvent(new Event("mahakal-booking-success"));
+      }
     } catch (err) {
       const errMsg = err.response?.data?.error || "Failed to book entry pass.";
       toast.error(errMsg);

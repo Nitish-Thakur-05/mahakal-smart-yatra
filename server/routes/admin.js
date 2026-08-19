@@ -13,9 +13,10 @@ router.get("/alert-public", async (req, res) => {
     let alertDoc = await SiteAlert.findOne();
     if (!alertDoc) {
       alertDoc = await SiteAlert.create({
-        message: '🚩 OFFICIAL ANNOUNCEMENT: Shri Mahakaleshwar Temple Bhasma Aarti online booking for upcoming festival season is open. Please carry original Photo ID for entry.',
+        message:
+          "🚩 OFFICIAL ANNOUNCEMENT: Shri Mahakaleshwar Temple Bhasma Aarti online booking for upcoming festival season is open. Please carry original Photo ID for entry.",
         isActive: true,
-        alertType: 'warning'
+        alertType: "warning",
       });
     }
     res.json(alertDoc);
@@ -24,12 +25,12 @@ router.get("/alert-public", async (req, res) => {
   }
 });
 
-const { fetchChronosForecast } = require('../services/chronosClient');
+const { fetchChronosForecast } = require("../services/chronosClient");
 
 // PUBLIC ENDPOINT: Fetch AI Crowd Forecast
 router.get("/crowd/forecast-public", async (req, res) => {
   try {
-    const forceRefresh = req.query.refresh === 'true';
+    const forceRefresh = req.query.refresh === "true";
     const forecast = await fetchChronosForecast(forceRefresh);
     res.json(forecast);
   } catch (err) {
@@ -43,7 +44,7 @@ router.use(requireAdmin);
 // GET /api/admin/crowd/forecast (Admin AI Crowd Forecast)
 router.get("/crowd/forecast", async (req, res) => {
   try {
-    const forceRefresh = req.query.refresh === 'true';
+    const forceRefresh = req.query.refresh === "true";
     const forecast = await fetchChronosForecast(forceRefresh);
     res.json(forecast);
   } catch (err) {
@@ -57,9 +58,10 @@ router.get("/alert", async (req, res) => {
     let alertDoc = await SiteAlert.findOne();
     if (!alertDoc) {
       alertDoc = await SiteAlert.create({
-        message: '🚩 OFFICIAL ANNOUNCEMENT: Shri Mahakaleshwar Temple Bhasma Aarti online booking for upcoming festival season is open. Please carry original Photo ID for entry.',
+        message:
+          "🚩 OFFICIAL ANNOUNCEMENT: Shri Mahakaleshwar Temple Bhasma Aarti online booking for upcoming festival season is open. Please carry original Photo ID for entry.",
         isActive: true,
-        alertType: 'warning'
+        alertType: "warning",
       });
     }
     res.json(alertDoc);
@@ -82,7 +84,10 @@ router.post("/alert", async (req, res) => {
       if (speed !== undefined) alertDoc.speed = speed;
     }
     await alertDoc.save();
-    res.json({ message: "Website scrolling alert updated successfully!", alert: alertDoc });
+    res.json({
+      message: "Website scrolling alert updated successfully!",
+      alert: alertDoc,
+    });
   } catch (err) {
     res.status(500).json({ error: "Failed to update site alert" });
   }
@@ -93,7 +98,10 @@ router.get("/stats", async (req, res) => {
   try {
     const totalUsers = await User.countDocuments({ role: "devotee" });
     const totalHotels = await User.countDocuments({ role: "hotel" });
-    const pendingHotels = await User.countDocuments({ role: "hotel", isApproved: false });
+    const pendingHotels = await User.countDocuments({
+      role: "hotel",
+      isApproved: false,
+    });
     const totalTemples = await Temple.countDocuments({});
     const totalEvents = await Event.countDocuments({});
 
@@ -102,7 +110,7 @@ router.get("/stats", async (req, res) => {
       totalHotels,
       pendingHotels,
       totalTemples,
-      totalEvents
+      totalEvents,
     });
   } catch (err) {
     res.status(500).json({ error: "Failed to fetch admin stats" });
@@ -112,11 +120,13 @@ router.get("/stats", async (req, res) => {
 // GET /api/admin/users
 router.get("/users", async (req, res) => {
   try {
-    const users = await User.find({}).select("-password").sort({ createdAt: -1 });
+    const users = await User.find({})
+      .select("-password")
+      .sort({ createdAt: -1 });
     // Migrate any legacy database records with Sancthan
     for (let u of users) {
-      if (u.name && u.name.includes('Sancthan')) {
-        u.name = u.name.replace(/Sancthan/g, 'Mahakal');
+      if (u.name && u.name.includes("Sancthan")) {
+        u.name = u.name.replace(/Sancthan/g, "Mahakal");
         await u.save();
       }
     }
@@ -135,7 +145,10 @@ router.patch("/users/:id/approve", async (req, res) => {
     }
     user.isApproved = !user.isApproved;
     await user.save();
-    res.json({ message: `Account approval status set to ${user.isApproved}`, user });
+    res.json({
+      message: `Account approval status set to ${user.isApproved}`,
+      user,
+    });
   } catch (err) {
     res.status(500).json({ error: "Failed to update approval status" });
   }
@@ -164,7 +177,9 @@ router.post("/temples", async (req, res) => {
 // PUT /api/admin/temples/:id
 router.put("/temples/:id", async (req, res) => {
   try {
-    const temple = await Temple.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    const temple = await Temple.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+    });
     res.json({ message: "Shrine updated successfully", temple });
   } catch (err) {
     res.status(500).json({ error: "Failed to update temple" });

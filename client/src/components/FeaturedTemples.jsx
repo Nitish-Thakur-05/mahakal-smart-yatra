@@ -13,61 +13,69 @@ import stackedStyles from "../styles/featured_stacked.module.css";
 import customStyles from "../styles/custom.module.css";
 
 export function FeaturedTemples({ temples }) {
-  const displayTemples =
-    temples && temples.length > 0
-      ? temples
-      : [
-          {
-            id: "shri-mahakaleshwar",
-            name: "Shri Mahakaleshwar Jyotirlinga",
-            tagline: "The Sovereign Lord of Time & Dakshinamukhi Jyotirlinga",
-            image:
-              "https://images.unsplash.com/photo-1627894006596-9b057508007a?auto=format&fit=crop&q=80&w=800",
-            description:
-              "Main South-facing Jyotirlinga shrine. Famous worldwide for 4:00 AM Bhasma Aarti.",
-            highlight: "Main Shrine • 360° Tour",
-          },
-          {
-            id: "harsiddhi-mata",
-            name: "Harsiddhi Mata Temple",
-            tagline: "Sacred 51 Shaktipeeth & Deepstambha Glow",
-            image:
-              "https://images.unsplash.com/photo-1567157577867-05ccb1388e66?auto=format&fit=crop&q=80&w=800",
-            description:
-              "0.2 km from Mahakal. 51 Shaktipeeth with two 13th-century Deepstambha lamp towers.",
-            highlight: "0.2 km from Mahakal",
-          },
-          {
-            id: "kal-bhairav",
-            name: "Kal Bhairav Temple",
-            tagline: "Guardian Commander of Ancient Ujjain",
-            image:
-              "https://images.unsplash.com/photo-1582510003544-4d00b7f74220?auto=format&fit=crop&q=80&w=800",
-            description:
-              "0.5 km from Mahakal. Guardian deity shrine visited right after Mahakaleshwar.",
-            highlight: "0.5 km from Mahakal",
-          },
-          {
-            id: "bade-ganeshji",
-            name: "Bade Ganeshji Ka Mandir",
-            tagline: "Ancient Giant 18ft Lord Ganesha Shrine",
-            image:
-              "https://images.unsplash.com/photo-1567591370504-20b1e428cf11?auto=format&fit=crop&q=80&w=800",
-            description:
-              "0.1 km from Mahakal. Features a massive 18-foot Lord Ganesha idol.",
-            highlight: "0.1 km from Mahakal",
-          },
-          {
-            id: "ram-ghat",
-            name: "Ram Ghat (Shipra River)",
-            tagline: "Sacred River Ghat of Simhastha Kumbh Mela",
-            image:
-              "https://images.unsplash.com/photo-1544735716-392fe2489ffa?auto=format&fit=crop&q=80&w=800",
-            description:
-              "0.4 km from Mahakal. Ancient bathing ghat famous for evening Shipra Aarti.",
-            highlight: "0.4 km from Mahakal",
-          },
-        ];
+  const defaultTemples = [
+    {
+      id: "shri-mahakaleshwar",
+      name: "Shri Mahakaleshwar Jyotirlinga",
+      tagline: "The Sovereign Lord of Time & Dakshinamukhi Jyotirlinga",
+      image: "/mahakalTemple.jpeg",
+      description:
+        "Main South-facing Jyotirlinga shrine. Famous worldwide for 4:00 AM Bhasma Aarti.",
+      highlight: "Main Shrine • 360° Tour",
+    },
+    {
+      id: "harsiddhi-mata",
+      name: "Harsiddhi Mata Temple",
+      tagline: "Sacred 51 Shaktipeeth & Deepstambha Glow",
+      image: "/temples/harsiddhi.png",
+      description:
+        "0.2 km from Mahakal. 51 Shaktipeeth with two 13th-century Deepstambha lamp towers.",
+      highlight: "0.2 km from Mahakal",
+    },
+    {
+      id: "kal-bhairav",
+      name: "Kal Bhairav Temple",
+      tagline: "Guardian Commander of Ancient Ujjain",
+      image: "/temples/kal_bhairav.png",
+      description:
+        "0.5 km from Mahakal. Guardian deity shrine visited right after Mahakaleshwar.",
+      highlight: "0.5 km from Mahakal",
+    },
+    {
+      id: "bade-ganeshji",
+      name: "Bade Ganeshji Ka Mandir",
+      tagline: "Ancient Giant 18ft Lord Ganesha Shrine",
+      image: "/ganeshTemple.jpeg",
+      description:
+        "0.1 km from Mahakal. Features a massive 18-foot Lord Ganesha idol.",
+      highlight: "0.1 km from Mahakal",
+    },
+    {
+      id: "ram-ghat",
+      name: "Ram Ghat (Shipra River)",
+      tagline: "Sacred River Ghat of Simhastha Kumbh Mela",
+      image: "/itineraries/heritage.png",
+      description:
+        "0.4 km from Mahakal. Ancient bathing ghat famous for evening Shipra Aarti.",
+      highlight: "0.4 km from Mahakal",
+    },
+  ];
+
+  const rawTemples = temples && temples.length > 0 ? temples : defaultTemples;
+
+  const displayTemples = rawTemples.map((item, idx) => {
+    let fallbackImg = "/mahakalTemple.jpeg";
+    if (item.name?.toLowerCase().includes("harsiddhi")) fallbackImg = "/temples/harsiddhi.png";
+    else if (item.name?.toLowerCase().includes("bhairav")) fallbackImg = "/temples/kal_bhairav.png";
+    else if (item.name?.toLowerCase().includes("ganesh")) fallbackImg = "/ganeshTemple.jpeg";
+    else if (item.name?.toLowerCase().includes("ram ghat") || item.name?.toLowerCase().includes("shipra")) fallbackImg = "/itineraries/heritage.png";
+    else if (defaultTemples[idx]?.image) fallbackImg = defaultTemples[idx].image;
+
+    return {
+      ...item,
+      image: (item.image && !item.image.includes("unsplash.com")) ? item.image : fallbackImg
+    };
+  });
 
   const [activeIndex, setActiveIndex] = useState(0);
   const [hoveredIndex, setHoveredIndex] = useState(null);

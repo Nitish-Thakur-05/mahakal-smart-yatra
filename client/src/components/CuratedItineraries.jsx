@@ -1,97 +1,95 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Calendar, Compass, ArrowRight } from 'lucide-react';
 import { motion } from 'framer-motion';
-import styles from '../styles/custom.module.css';
 
 export function CuratedItineraries({ itineraries }) {
-  const displayItineraries = itineraries && itineraries.length > 0 ? itineraries : [
+  const defaultItineraries = [
     {
       id: 1,
       days: "1 Day",
-      title: "1-Day Express Mahakal & Bhasma Aarti Circuit",
-      destination: "Mahakal Temple & Shipra Ghats",
-      description: "Experience 4 AM Bhasma Aarti, explore Mahakal Lok Corridor, visit Harsiddhi Temple, and attend Shipra Evening Aarti.",
-      image: "https://images.unsplash.com/photo-1627894006596-9b057508007a?auto=format&fit=crop&q=80&w=600"
+      title: "Mahakal Bhasma Aarti Express",
+      destination: "Mahakaleshwar & Shipra Ghats",
+      description: "Experience 4 AM Bhasma Aarti, Shri Mahakal Lok Corridor, and Harsiddhi Temple.",
+      image: "/itineraries/bhasma_aarti.png"
     },
     {
       id: 2,
       days: "2 Days",
-      title: "2-Day Jyotirlinga & Shaktipeeth Pilgrimage",
-      destination: "Ujjain & Omkareshwar Excursion",
-      description: "Day 1 in Mahakaleshwar & Harsiddhi. Day 2 trip to Omkareshwar Jyotirlinga along Narmada River.",
-      image: "https://images.unsplash.com/photo-1609137144813-7d9921338f24?auto=format&fit=crop&q=80&w=600"
+      title: "Jyotirlinga & Shaktipeeth Yatra",
+      destination: "Ujjain & Omkareshwar Circuit",
+      description: "Mahakaleshwar, Harsiddhi Shaktipeeth, and Omkareshwar Narmada tour.",
+      image: "/itineraries/jyotirlinga.png"
     },
     {
       id: 3,
       days: "3 Days",
-      title: "3-Day Ujjain Heritage & Astrological Trail",
-      destination: "Full Avantika Tour",
-      description: "Covers Mahakaleshwar, Kal Bhairav, Mangalnath, Sandipani Ashram, Jantar Mantar observatory, and Chintaman Ganesh.",
-      image: "https://images.unsplash.com/photo-1544735716-392fe2489ffa?auto=format&fit=crop&q=80&w=600"
+      title: "Ujjain Heritage & Astrological Trail",
+      destination: "Avantika Temple Circuit",
+      description: "Mahakaleshwar, Kal Bhairav, Mangalnath Mars Temple & Sandipani Ashram.",
+      image: "/itineraries/heritage.png"
     }
   ];
 
+  const displayItineraries = defaultItineraries;
+
   return (
-    <section className="py-5 bg-dark text-white position-relative overflow-hidden">
-      <div className="container py-4">
+    <section className="curated-itineraries-section py-5 position-relative overflow-hidden">
+      <div className="container py-3 curated-itineraries-container">
         {/* Section Header */}
         <motion.div 
           className="text-center mb-5"
-          initial={{ opacity: 0, y: 30 }}
+          initial={{ opacity: 0, y: 25 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: false, amount: 0.2 }}
-          transition={{ duration: 0.6 }}
+          transition={{ duration: 0.5 }}
         >
-          <p className="text-warning text-uppercase fw-semibold tracking-widest small mb-1">
-            EXPLORE UJJAIN PILGRIMAGE
+          <p className="text-warning text-uppercase fw-semibold tracking-widest small mb-1 font-monospace" style={{ fontSize: '0.8rem' }}>
+            DISCOVER UJJAIN
           </p>
-          <h2 className={`display-5 fw-bold text-white mb-2 ${styles.playfairFont}`}>
+          <h2
+            className="display-5 fw-bold mb-2 curated-section-heading"
+            style={{ fontFamily: "'Playfair Display', Georgia, serif", fontStyle: 'italic' }}
+          >
             Curated Pilgrimage Itineraries
           </h2>
-          <p className="text-secondary max-w-600 mx-auto">
-            Thoughtfully planned travel packages to help you experience temples, Bhasma Aarti, and sacred ghats seamlessly.
+          <p className="curated-itinerary-sub max-w-600 mx-auto small mb-0">
+            Handpicked travel plans designed to help you explore sacred temples, Bhasma Aarti, and divine heritage.
           </p>
         </motion.div>
 
-        {/* Arch Shaped Itinerary Cards */}
+        {/* Minimal 3 Arched Cards Grid */}
         <div className="row g-4 justify-content-center">
           {displayItineraries.map((item, index) => (
-            <div key={item.id} className="col-lg-4 col-md-6">
+            <div key={item.id || index} className="col-lg-4 col-md-4 col-sm-6">
               <motion.div
-                initial={{ opacity: 0, y: 40 }}
+                initial={{ opacity: 0, y: 35 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, amount: 0.2 }}
-                transition={{ duration: 0.6, delay: index * 0.12 }}
-                whileHover={{ y: -10, scale: 1.03 }}
-                className={`card bg-black text-white ${styles.archCard} h-100 p-3`}
+                transition={{ duration: 0.5, delay: index * 0.1 }}
+                className="curated-arch-card h-100 d-flex flex-column text-center"
               >
-                <div className="position-relative overflow-hidden rounded-top-pill" style={{ height: '260px' }}>
-                  <img src={item.image} alt={item.title} className="w-100 h-100 object-fit-cover" />
-                  <div className="position-absolute top-0 start-0 m-3">
-                    <span className="badge bg-warning text-dark font-monospace fw-bold px-3 py-2 rounded-pill">
-                      <Calendar size={14} className="me-1" /> {item.days}
-                    </span>
+                <Link to="/planner" className="text-decoration-none d-flex flex-column h-100">
+                  {/* Arch Frame */}
+                  <div className="curated-arch-img-box flex-shrink-0">
+                    <img src={item.image} alt={item.title} />
+                    <div className="curated-arch-img-overlay" />
                   </div>
-                </div>
-                
-                <div className="card-body p-4 d-flex flex-column">
-                  <h5 className={`card-title text-warning fw-bold mb-2 ${styles.playfairFont}`}>
-                    {item.title}
-                  </h5>
-                  <p className="text-secondary small mb-3">
-                    <Compass size={14} className="me-1 text-warning" /> {item.destination}
-                  </p>
-                  <p className="card-text text-light small flex-grow-1">
-                    {item.description}
-                  </p>
                   
-                  <div className="mt-3">
-                    <Link to="/planner" className="btn btn-outline-warning w-100 rounded-pill d-flex align-items-center justify-content-center gap-2 text-decoration-none fw-semibold">
-                      <span>View Route Plan</span> <ArrowRight size={16} />
-                    </Link>
+                  {/* Minimal Details Below Arch */}
+                  <div className="pt-3 d-flex flex-column flex-grow-1 align-items-center">
+                    <span className="text-warning font-monospace fw-bold small text-uppercase tracking-wider mb-1" style={{ fontSize: '0.82rem' }}>
+                      {item.days}
+                    </span>
+
+                    <h5 className="curated-itinerary-title fw-bold mb-1">
+                      {item.title}
+                    </h5>
+
+                    <p className="curated-itinerary-sub small mb-0 opacity-75">
+                      {item.destination}
+                    </p>
                   </div>
-                </div>
+                </Link>
               </motion.div>
             </div>
           ))}

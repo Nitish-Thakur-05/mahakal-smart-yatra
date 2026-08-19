@@ -2,8 +2,8 @@ const express = require('express');
 const router = express.Router();
 const Room = require('../models/Room');
 const Booking = require('../models/Booking');
-const User = require('../models/User');
 const { authenticateToken } = require('../middleware/auth');
+const { sendETicketEmail } = require('../services/emailService');
 
 // ─── HOTEL PARTNER: MY ROOMS ──────────────────────────────────────────────────
 
@@ -105,6 +105,23 @@ router.post('/book/:id', authenticateToken, async (req, res) => {
       roomNumber: room.roomNumber,
       status: 'confirmed'
     });
+
+    // Auto-send hotel booking confirmation E-Ticket email
+    if (req.user.email) {
+      sendETicketEmail({
+        toEmail: req.user.email,
+        ticketType: "HOTEL STAY RESERVATION",
+        ticketDetails: {
+          passId: booking.bookingRef || booking._id.toString().substring(16).toUpperCase(),
+          primaryName: req.user.name,
+          contactPhone: guestPhone,
+          bookingDate: checkInDate,
+          hotelName: room.hotelName,
+          roomType: room.roomType,
+          totalAmount: totalPrice,
+        },
+      });
+    }
 
     res.json({
       success: true,

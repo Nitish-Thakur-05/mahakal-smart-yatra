@@ -299,15 +299,17 @@ export function AdminDashboard({ user, onOpenAuth }) {
   const [supportTickets, setSupportTickets] = useState([]);
   const [selectedDate, setSelectedDate] = useState("today");
 
-  const [inventoryRange, setInventoryRange] = useState('today');
+  const [inventoryRange, setInventoryRange] = useState("today");
   const [inventoryData, setInventoryData] = useState(null);
-  const [selectedCalendarDate, setSelectedCalendarDate] = useState(new Date().toISOString().substring(0, 10));
+  const [selectedCalendarDate, setSelectedCalendarDate] = useState(
+    new Date().toISOString().substring(0, 10),
+  );
 
   const dateInputRef = useRef(null);
 
   const handleCalendarIconClick = () => {
     if (dateInputRef.current) {
-      if (typeof dateInputRef.current.showPicker === 'function') {
+      if (typeof dateInputRef.current.showPicker === "function") {
         dateInputRef.current.showPicker();
       } else {
         dateInputRef.current.click();
@@ -317,7 +319,9 @@ export function AdminDashboard({ user, onOpenAuth }) {
 
   const fetchInventoryAnalytics = async (range = inventoryRange) => {
     try {
-      const res = await axios.get(`/api/passes/inventory-analytics?range=${range}`);
+      const res = await axios.get(
+        `/api/passes/inventory-analytics?range=${range}`,
+      );
       if (res.data) {
         setInventoryData(res.data);
       }
@@ -333,9 +337,11 @@ export function AdminDashboard({ user, onOpenAuth }) {
 
   const handleDateSelect = async (customDateStr) => {
     setSelectedCalendarDate(customDateStr);
-    setInventoryRange('custom');
+    setInventoryRange("custom");
     try {
-      const res = await axios.get(`/api/passes/inventory-analytics?date=${customDateStr}`);
+      const res = await axios.get(
+        `/api/passes/inventory-analytics?date=${customDateStr}`,
+      );
       if (res.data) setInventoryData(res.data);
     } catch (e) {
       console.error("Failed to load inventory for date", customDateStr, e);
@@ -349,7 +355,16 @@ export function AdminDashboard({ user, onOpenAuth }) {
     for (let i = 0; i <= 30; i++) {
       const d = new Date(now.getTime() - i * 24 * 60 * 60 * 1000);
       const isoStr = d.toISOString().substring(0, 10);
-      const label = i === 0 ? "Today (Resets Daily)" : i === 1 ? "Yesterday" : d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+      const label =
+        i === 0
+          ? "Today (Resets Daily)"
+          : i === 1
+            ? "Yesterday"
+            : d.toLocaleDateString("en-US", {
+                weekday: "short",
+                month: "short",
+                day: "numeric",
+              });
       days.push({ dateStr: isoStr, label });
     }
     return days;
@@ -456,7 +471,8 @@ export function AdminDashboard({ user, onOpenAuth }) {
       if (passAnalyticsRes && passAnalyticsRes.data)
         setPassAnalytics(passAnalyticsRes.data);
       if (chronosRes && chronosRes.data) setChronosForecast(chronosRes.data);
-      if (inventoryRes && inventoryRes.data) setInventoryData(inventoryRes.data);
+      if (inventoryRes && inventoryRes.data)
+        setInventoryData(inventoryRes.data);
     } catch (err) {
       toast.error(
         err.response?.data?.error ||
@@ -469,7 +485,7 @@ export function AdminDashboard({ user, onOpenAuth }) {
   };
 
   useEffect(() => {
-    fetchInventoryAnalytics('today');
+    fetchInventoryAnalytics("today");
     if (user && (user.role === "official" || user.role === "admin"))
       fetchAdminData();
   }, [user]);
@@ -1123,16 +1139,29 @@ export function AdminDashboard({ user, onOpenAuth }) {
             )}
 
             {/* 1. Daily Aarti Passes & Tickets Inventory */}
-            <div className={`card bg-dark text-white p-4 p-md-5 ${styles.glassCard} border border-warning border-opacity-25 shadow-2xl`}>
+            <div
+              className={`card bg-dark text-white p-4 p-md-5 ${styles.glassCard} border border-warning border-opacity-25 shadow-2xl`}
+            >
               <div className="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4 pb-3 border-bottom border-warning border-opacity-20">
                 <div className="d-flex align-items-center gap-3">
-                  <div className="rounded-circle bg-warning text-dark d-flex align-items-center justify-content-center" style={{ width: 44, height: 44, flexShrink: 0 }}>
+                  <div
+                    className="rounded-circle bg-warning text-dark d-flex align-items-center justify-content-center"
+                    style={{ width: 44, height: 44, flexShrink: 0 }}
+                  >
                     <Ticket size={22} />
                   </div>
                   <div>
-                    <h4 className={`text-white fw-bold mb-1 ${styles.playfairFont}`}>Daily Aarti Passes & Tickets Inventory</h4>
+                    <h4
+                      className={`text-white fw-bold mb-1 ${styles.playfairFont}`}
+                    >
+                      Daily Aarti Passes & Tickets Inventory
+                    </h4>
                     <p className="text-secondary small mb-0">
-                      Live status for <strong className="text-warning">{inventoryData?.timeframeLabel || 'Today'}</strong> (Resets at 12:00 AM Daily)
+                      Live status for{" "}
+                      <strong className="text-warning">
+                        {inventoryData?.timeframeLabel || "Today"}
+                      </strong>{" "}
+                      (Resets at 12:00 AM Daily)
                     </p>
                   </div>
                 </div>
@@ -1147,7 +1176,7 @@ export function AdminDashboard({ user, onOpenAuth }) {
                       width: "175px",
                       fontSize: "0.84rem",
                       cursor: "pointer",
-                      colorScheme: "dark"
+                      colorScheme: "dark",
                     }}
                     value={selectedCalendarDate}
                     onChange={(e) => handleDateSelect(e.target.value)}
@@ -1172,36 +1201,61 @@ export function AdminDashboard({ user, onOpenAuth }) {
                   </thead>
                   <tbody>
                     {(inventoryData?.aartiAnalytics || []).map((aarti) => {
-                      const pct = Math.round((aarti.sold / aarti.capacity) * 100) || 0;
+                      const pct =
+                        Math.round((aarti.sold / aarti.capacity) * 100) || 0;
                       return (
-                        <tr key={aarti.id} className="border-bottom border-secondary border-opacity-15">
+                        <tr
+                          key={aarti.id}
+                          className="border-bottom border-secondary border-opacity-15"
+                        >
                           <td className="py-3">
-                            <span className="fw-bold text-white font-monospace">{aarti.name}</span>
+                            <span className="fw-bold text-white font-monospace">
+                              {aarti.name}
+                            </span>
                           </td>
-                          <td className="py-3 text-secondary small">{aarti.time}</td>
-                          <td className="py-3 text-center font-monospace fw-semibold">{aarti.capacity}</td>
-                          <td className="py-3 text-center font-monospace fw-bold text-success">{aarti.sold} Sold</td>
-                          <td className="py-3 text-center font-monospace fw-bold text-warning">{aarti.left} Left</td>
+                          <td className="py-3 text-secondary small">
+                            {aarti.time}
+                          </td>
+                          <td className="py-3 text-center font-monospace fw-semibold">
+                            {aarti.capacity}
+                          </td>
+                          <td className="py-3 text-center font-monospace fw-bold text-success">
+                            {aarti.sold} Sold
+                          </td>
+                          <td className="py-3 text-center font-monospace fw-bold text-warning">
+                            {aarti.left} Left
+                          </td>
                           <td className="py-3" style={{ minWidth: 160 }}>
                             <div className="d-flex align-items-center gap-2">
-                              <div className="progress bg-black flex-grow-1" style={{ height: 7 }}>
+                              <div
+                                className="progress bg-black flex-grow-1"
+                                style={{ height: 7 }}
+                              >
                                 <div
-                                  className={`progress-bar ${pct > 90 ? 'bg-danger' : pct > 75 ? 'bg-warning' : 'bg-success'}`}
+                                  className={`progress-bar ${pct > 90 ? "bg-danger" : pct > 75 ? "bg-warning" : "bg-success"}`}
                                   style={{ width: `${pct}%` }}
                                 />
                               </div>
-                              <span className="small font-monospace text-secondary" style={{ fontSize: '0.76rem' }}>{pct}%</span>
+                              <span
+                                className="small font-monospace text-secondary"
+                                style={{ fontSize: "0.76rem" }}
+                              >
+                                {pct}%
+                              </span>
                             </div>
                           </td>
                           <td className="py-3 text-end font-monospace">
                             {aarti.status === "Seats Available" ? (
-                              <span className="text-success fw-semibold small">Seats Available</span>
+                              <span className="text-success fw-semibold small">
+                                Seats Available
+                              </span>
                             ) : (
                               <span
                                 className={`badge rounded-pill px-3 py-1 small ${
-                                  aarti.status?.includes("Closing") || aarti.left < 200
-                                    ? 'bg-danger text-white'
-                                    : 'bg-warning bg-opacity-15 text-warning border border-warning border-opacity-30'
+                                  aarti.status?.includes("Closing") ||
+                                  aarti.left < 200
+                                    ? "bg-danger text-white"
+                                    : "bg-warning bg-opacity-15 text-warning border border-warning border-opacity-30"
                                 }`}
                               >
                                 {aarti.status}
@@ -1217,16 +1271,28 @@ export function AdminDashboard({ user, onOpenAuth }) {
             </div>
 
             {/* 2. VIP Darshan Daily Bookings & Revenue */}
-            <div className={`card bg-dark text-white p-4 p-md-5 ${styles.glassCard} border border-warning border-opacity-25 shadow-2xl`}>
+            <div
+              className={`card bg-dark text-white p-4 p-md-5 ${styles.glassCard} border border-warning border-opacity-25 shadow-2xl`}
+            >
               <div className="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4 pb-3 border-bottom border-warning border-opacity-20">
                 <div className="d-flex align-items-center gap-3">
-                  <div className="rounded-circle bg-warning text-dark d-flex align-items-center justify-content-center" style={{ width: 44, height: 44, flexShrink: 0 }}>
+                  <div
+                    className="rounded-circle bg-warning text-dark d-flex align-items-center justify-content-center"
+                    style={{ width: 44, height: 44, flexShrink: 0 }}
+                  >
                     <Crown size={22} />
                   </div>
                   <div>
-                    <h4 className={`text-white fw-bold mb-1 ${styles.playfairFont}`}>VIP Darshan Daily Bookings & Revenue</h4>
+                    <h4
+                      className={`text-white fw-bold mb-1 ${styles.playfairFont}`}
+                    >
+                      VIP Darshan Daily Bookings & Revenue
+                    </h4>
                     <p className="text-secondary small mb-0">
-                      Live package revenue for <strong className="text-warning">{inventoryData?.timeframeLabel || 'Today'}</strong>
+                      Live package revenue for{" "}
+                      <strong className="text-warning">
+                        {inventoryData?.timeframeLabel || "Today"}
+                      </strong>
                     </p>
                   </div>
                 </div>
@@ -1241,7 +1307,7 @@ export function AdminDashboard({ user, onOpenAuth }) {
                       width: "175px",
                       fontSize: "0.84rem",
                       cursor: "pointer",
-                      colorScheme: "dark"
+                      colorScheme: "dark",
                     }}
                     value={selectedCalendarDate}
                     onChange={(e) => handleDateSelect(e.target.value)}
@@ -1256,20 +1322,36 @@ export function AdminDashboard({ user, onOpenAuth }) {
                   <div className="row g-3 mb-4">
                     <div className="col-md-4">
                       <div className="p-3 bg-black rounded-3 border border-secondary border-opacity-30">
-                        <small className="text-secondary font-monospace d-block mb-1">ANALYTICS TIMEFRAME</small>
-                        <span className="h5 fw-bold text-white mb-0">{inventoryData.timeframeLabel || inventoryData.vipAnalytics.timeframeLabel}</span>
+                        <small className="text-secondary font-monospace d-block mb-1">
+                          ANALYTICS TIMEFRAME
+                        </small>
+                        <span className="h5 fw-bold text-white mb-0">
+                          {inventoryData.timeframeLabel ||
+                            inventoryData.vipAnalytics.timeframeLabel}
+                        </span>
                       </div>
                     </div>
                     <div className="col-md-4">
                       <div className="p-3 bg-black rounded-3 border border-warning border-opacity-30">
-                        <small className="text-secondary font-monospace d-block mb-1">VIP PASSES ISSUED</small>
-                        <span className="h3 fw-bold text-warning mb-0">{inventoryData.vipAnalytics.totalPasses} Passes</span>
+                        <small className="text-secondary font-monospace d-block mb-1">
+                          VIP PASSES ISSUED
+                        </small>
+                        <span className="h3 fw-bold text-warning mb-0">
+                          {inventoryData.vipAnalytics.totalPasses} Passes
+                        </span>
                       </div>
                     </div>
                     <div className="col-md-4">
                       <div className="p-3 bg-black rounded-3 border border-success border-opacity-30">
-                        <small className="text-secondary font-monospace d-block mb-1">TOTAL REVENUE</small>
-                        <span className="h3 fw-bold text-success mb-0">₹{(inventoryData.vipAnalytics.totalRevenue || 0).toLocaleString()}</span>
+                        <small className="text-secondary font-monospace d-block mb-1">
+                          TOTAL REVENUE
+                        </small>
+                        <span className="h3 fw-bold text-success mb-0">
+                          ₹
+                          {(
+                            inventoryData.vipAnalytics.totalRevenue || 0
+                          ).toLocaleString()}
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -1288,18 +1370,29 @@ export function AdminDashboard({ user, onOpenAuth }) {
                       </thead>
                       <tbody>
                         {inventoryData.vipAnalytics.packages.map((pkg, idx) => (
-                          <tr key={idx} className="border-bottom border-secondary border-opacity-15">
+                          <tr
+                            key={idx}
+                            className="border-bottom border-secondary border-opacity-15"
+                          >
                             <td className="py-3">
-                              <span className="fw-bold text-white font-monospace">{pkg.name}</span>
+                              <span className="fw-bold text-white font-monospace">
+                                {pkg.name}
+                              </span>
                             </td>
                             <td className="py-3">
                               <span className="badge bg-black text-warning border border-warning border-opacity-30 small">
                                 {pkg.gate}
                               </span>
                             </td>
-                            <td className="py-3 text-center font-monospace fw-semibold text-light">₹{pkg.price}</td>
-                            <td className="py-3 text-center font-monospace fw-bold text-warning">{pkg.sold} Sold</td>
-                            <td className="py-3 text-end font-monospace fw-bold text-success">₹{(pkg.price * pkg.sold).toLocaleString()}</td>
+                            <td className="py-3 text-center font-monospace fw-semibold text-light">
+                              ₹{pkg.price}
+                            </td>
+                            <td className="py-3 text-center font-monospace fw-bold text-warning">
+                              {pkg.sold} Sold
+                            </td>
+                            <td className="py-3 text-end font-monospace fw-bold text-success">
+                              ₹{(pkg.price * pkg.sold).toLocaleString()}
+                            </td>
                           </tr>
                         ))}
                       </tbody>
@@ -1443,43 +1536,6 @@ export function AdminDashboard({ user, onOpenAuth }) {
                   </button>
                 </div>
               </div>
-
-              {/* DYNAMIC RE-FORECASTING ALERT NOTE */}
-              <div className="alert bg-black border border-warning border-opacity-30 text-white rounded-3 p-3 mb-4 small d-flex align-items-center justify-content-between gap-3">
-                <div className="d-flex align-items-center gap-2">
-                  <TrendingUp
-                    size={18}
-                    className="text-warning flex-shrink-0"
-                  />
-                  <span>
-                    <strong>Dynamic AI Re-Forecasting Engine:</strong> Whenever
-                    a devotee books, cancels, or reschedules an entry pass,
-                    real-time MongoDB telemetry triggers updated{" "}
-                    <strong>AI predictions</strong>.
-                  </span>
-                </div>
-                <span className="badge bg-warning text-dark font-monospace fw-bold px-2.5 py-1">
-                  REALTIME AI SYNC
-                </span>
-              </div>
-
-              {/* AI INSIGHTS & RECOMMENDATIONS CARD */}
-              {chronosForecast?.aiInsights && (
-                <div className="alert bg-warning bg-opacity-10 border border-warning border-opacity-40 text-white rounded-3 p-3 mb-4 small d-flex align-items-start gap-2.5 shadow-sm">
-                  <Sparkles
-                    size={20}
-                    className="flex-shrink-0 text-warning mt-0.5"
-                  />
-                  <div>
-                    <strong className="text-warning font-semibold d-block mb-1">
-                      🤖 AI Operations Analysis & Advice:
-                    </strong>
-                    <span className="text-light">
-                      {chronosForecast.aiInsights}
-                    </span>
-                  </div>
-                </div>
-              )}
 
               {/* TOP METRICS: TOMORROW'S AI PREDICTION */}
               {chronosForecast ? (

@@ -297,8 +297,9 @@ export function CulturalEvents({ events, user, onOpenAuth }) {
       };
       const aartiIdKey = aartiKeyMap[bookingModalAarti?.id] || 'dadhodak';
 
-      await axios.post("/api/passes/generate-epass", {
+      const res = await axios.post("/api/passes/generate-epass", {
         primaryDevoteeName: userName || user?.name || "Devotee",
+        primaryEmail: userEmail || user?.email || "",
         contactPhone: "9876543210",
         numberOfPersons: ticketsCount,
         passengers: Array.from({ length: ticketsCount }, (_, i) => ({
@@ -312,6 +313,14 @@ export function CulturalEvents({ events, user, onOpenAuth }) {
         aartiName: bookingModalAarti?.nameEn || "Dadhodak Aarti (Naivedya Aarti)",
         gateNumber: 4
       });
+
+      if (res.data && res.data.pass) {
+        const userStorageKey = `mahakal_entry_passes_${user?.email || "guest"}`;
+        const existing = JSON.parse(localStorage.getItem(userStorageKey) || "[]");
+        const updated = [res.data.pass, ...existing];
+        localStorage.setItem(userStorageKey, JSON.stringify(updated));
+      }
+      window.dispatchEvent(new Event("mahakal-booking-success"));
     } catch (err) {
       console.error("Failed to sync booking to backend DB:", err);
     }

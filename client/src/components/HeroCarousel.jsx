@@ -143,32 +143,35 @@ export function HeroCarousel() {
             <div className="d-flex gap-3 align-items-center">
               {/* Mute Button */}
               <button
+                type="button"
                 onClick={toggleMute}
-                className="btn btn-dark text-white rounded-circle p-3 d-flex align-items-center justify-content-center border-0 shadow-lg"
-                style={{ backgroundColor: 'rgba(255, 255, 255, 0.2)', backdropFilter: 'blur(8px)', width: 50, height: 50 }}
+                className="btn hero-carousel-control-btn text-white rounded-circle p-3 d-flex align-items-center justify-content-center shadow-lg"
+                style={{ backgroundColor: 'rgba(255, 255, 255, 0.25)', backdropFilter: 'blur(8px)', width: 50, height: 50, border: '1px solid rgba(255, 255, 255, 0.35)', color: '#ffffff' }}
                 title={isMuted ? "Unmute Temple Audio" : "Mute Temple Audio"}
               >
-                {isMuted ? <VolumeX size={22} /> : <Volume2 size={22} className="text-warning" />}
+                {isMuted ? <VolumeX size={22} style={{ color: '#ffffff' }} /> : <Volume2 size={22} className="text-warning" />}
               </button>
 
               {/* Prev Button */}
               <button
+                type="button"
                 onClick={() => handleVideoChange("prev")}
-                className="btn btn-dark text-white rounded-circle p-3 d-flex align-items-center justify-content-center border-0 shadow-lg"
-                style={{ backgroundColor: 'rgba(255, 255, 255, 0.2)', backdropFilter: 'blur(8px)', width: 50, height: 50 }}
+                className="btn hero-carousel-control-btn text-white rounded-circle p-3 d-flex align-items-center justify-content-center shadow-lg"
+                style={{ backgroundColor: 'rgba(255, 255, 255, 0.25)', backdropFilter: 'blur(8px)', width: 50, height: 50, border: '1px solid rgba(255, 255, 255, 0.35)', color: '#ffffff' }}
                 title="Previous Slide"
               >
-                <ChevronLeft size={22} />
+                <ChevronLeft size={22} style={{ color: '#ffffff' }} />
               </button>
 
               {/* Next Button */}
               <button
+                type="button"
                 onClick={() => handleVideoChange("next")}
-                className="btn btn-dark text-white rounded-circle p-3 d-flex align-items-center justify-content-center border-0 shadow-lg"
-                style={{ backgroundColor: 'rgba(255, 255, 255, 0.2)', backdropFilter: 'blur(8px)', width: 50, height: 50 }}
+                className="btn hero-carousel-control-btn text-white rounded-circle p-3 d-flex align-items-center justify-content-center shadow-lg"
+                style={{ backgroundColor: 'rgba(255, 255, 255, 0.25)', backdropFilter: 'blur(8px)', width: 50, height: 50, border: '1px solid rgba(255, 255, 255, 0.35)', color: '#ffffff' }}
                 title="Next Slide"
               >
-                <ChevronRight size={22} />
+                <ChevronRight size={22} style={{ color: '#ffffff' }} />
               </button>
             </div>
           </div>

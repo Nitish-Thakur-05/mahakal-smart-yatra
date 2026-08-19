@@ -9,6 +9,15 @@ export function RazorpayModal({ isOpen, onClose, amount, itemTitle, devoteeInfo,
   const [isSuccess, setIsSuccess] = useState(false);
   const [paymentId, setPaymentId] = useState('');
 
+  // Reset modal state whenever isOpen becomes true
+  React.useEffect(() => {
+    if (isOpen) {
+      setIsSuccess(false);
+      setLoading(false);
+      setPaymentId('');
+    }
+  }, [isOpen]);
+
   if (!isOpen) return null;
 
   const handlePayNow = (e) => {

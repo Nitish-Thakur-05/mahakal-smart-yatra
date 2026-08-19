@@ -1,30 +1,15 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { MapPin, Eye, Search, Sparkles, Compass, ArrowRight } from 'lucide-react';
-import { Temple360Viewer } from '../components/Temple360Viewer';
+import { MapPin, Search, ArrowRight } from 'lucide-react';
 import styles from '../styles/custom.module.css';
 
 export function Temples({ temples }) {
   const [searchTerm, setSearchTerm] = useState('');
-  const [active360TempleId, setActive360TempleId] = useState(null);
 
   const filtered = (temples || []).filter(t => 
     t.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     t.tagline?.toLowerCase().includes(searchTerm.toLowerCase())
   );
-
-  const getTemple360Key = (temple) => {
-    if (temple.id && (temple.id.includes("mahakal") || temple.id.includes("bhairav") || temple.id.includes("harsiddhi") || temple.id.includes("chintaman") || temple.id.includes("mangal") || temple.id.includes("sandipani"))) {
-      return temple.id;
-    }
-    const nameLower = (temple.name || "").toLowerCase();
-    if (nameLower.includes("kal bhairav") || nameLower.includes("kaal bhairav")) return "kal-bhairav";
-    if (nameLower.includes("harsiddhi")) return "harsiddhi-mata";
-    if (nameLower.includes("chintaman")) return "chintaman-ganesh";
-    if (nameLower.includes("mangal")) return "mangalnath-temple";
-    if (nameLower.includes("sandipani")) return "sandipani-ashram";
-    return "shri-mahakaleshwar";
-  };
 
   return (
     <div className="bg-black min-vh-100 text-white pb-5" style={{ paddingTop: '110px' }}>
@@ -32,10 +17,10 @@ export function Temples({ temples }) {
         {/* Header */}
         <div className="text-center mb-5">
           <h1 className={`display-4 fw-bold text-white mb-3 ${styles.playfairFont}`}>
-            Sacred Temples & 360° Virtual Shrines
+            Sacred Temples & Shrines of Ujjain
           </h1>
           <p className="text-secondary max-w-700 mx-auto">
-            Experience 360° interactive virtual darshan of Shri Mahakaleshwar Jyotirlinga, Kal Bhairav, Shaktipeeths, and ancient shrines of Ujjain with audio ambience and spiritual hotspots.
+            Explore Shri Mahakaleshwar Jyotirlinga, Kal Bhairav, Shaktipeeths, and ancient divine shrines of Ujjain with darshan timings and location guides.
           </p>
 
           {/* Search Bar */}
@@ -67,12 +52,9 @@ export function Temples({ temples }) {
                     className="w-100 h-100 object-fit-cover" 
                   />
                   <div className="position-absolute top-0 start-0 m-3">
-                    <button
-                      onClick={() => setActive360TempleId(getTemple360Key(temple))}
-                      className="badge bg-warning text-dark font-semibold px-3 py-1.5 rounded-pill border-0 shadow cursor-pointer d-flex align-items-center gap-1"
-                    >
-                      <Compass size={13} /> 360° Virtual Darshan
-                    </button>
+                    <span className="badge bg-warning text-dark font-semibold px-3 py-1.5 rounded-pill shadow small">
+                      {temple.highlight || 'Sacred Shrine'}
+                    </span>
                   </div>
                 </div>
 
@@ -89,19 +71,12 @@ export function Temples({ temples }) {
                     </p>
                   </div>
 
-                  <div className="pt-3 border-top border-secondary border-opacity-25 d-flex align-items-center justify-content-between gap-2">
-                    <button
-                      onClick={() => setActive360TempleId(getTemple360Key(temple))}
-                      className="btn btn-warning rounded-pill px-3 py-1.5 btn-sm font-semibold text-dark d-flex align-items-center gap-1.5"
-                    >
-                      <Compass size={15} /> 360° View
-                    </button>
-
+                  <div className="pt-3 border-top border-secondary border-opacity-25 text-end">
                     <Link 
                       to={`/temple/${temple.id || temple._id}`} 
-                      className="btn btn-outline-light rounded-pill px-3 py-1.5 btn-sm font-semibold d-flex align-items-center gap-1"
+                      className="btn btn-warning rounded-pill px-4 py-1.5 btn-sm font-semibold text-dark d-inline-flex align-items-center gap-1.5 text-decoration-none shadow-sm"
                     >
-                      <span>Full Details</span> <ArrowRight size={14} />
+                      <span>View Temple Details</span> <ArrowRight size={14} />
                     </Link>
                   </div>
                 </div>
@@ -109,14 +84,6 @@ export function Temples({ temples }) {
             </div>
           ))}
         </div>
-
-        {/* 360 Panorama Viewer Modal */}
-        {active360TempleId && (
-          <Temple360Viewer
-            templeId={active360TempleId}
-            onClose={() => setActive360TempleId(null)}
-          />
-        )}
       </div>
     </div>
   );
