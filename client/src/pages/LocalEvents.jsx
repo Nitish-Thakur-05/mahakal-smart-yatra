@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Calendar,
   Clock,
@@ -17,9 +17,12 @@ import {
   Flame,
   BookOpen,
   Sun,
+  Trash2,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "react-hot-toast";
+import axios from "axios";
+import { AddLocalEventModal } from "../components/AddLocalEventModal";
 import styles from "../styles/custom.module.css";
 
 export const LOCAL_EVENTS_DATA = [
@@ -259,10 +262,44 @@ export const LOCAL_EVENTS_DATA = [
   },
 ];
 
-export function LocalEvents() {
+export function LocalEvents({ user, onOpenAuth }) {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [activeModalEvent, setActiveModalEvent] = useState(null);
+  const [eventsList, setEventsList] = useState(LOCAL_EVENTS_DATA);
+  const [showAddModal, setShowAddModal] = useState(false);
+
+  const fetchEvents = async () => {
+    try {
+      const res = await axios.get("/api/events");
+      if (Array.isArray(res.data)) {
+        const map = new Map();
+        LOCAL_EVENTS_DATA.forEach((evt) => map.set(evt.id, evt));
+        res.data.forEach((evt) => map.set(evt.id || evt._id, evt));
+        setEventsList(Array.from(map.values()));
+      }
+    } catch (e) {
+      setEventsList(LOCAL_EVENTS_DATA);
+    }
+  };
+
+  useEffect(() => {
+    fetchEvents();
+  }, []);
+
+  const handleDeleteEvent = async (eventId) => {
+    if (!window.confirm("Are you sure you want to remove this local event listing?")) return;
+    try {
+      const token = localStorage.getItem("token");
+      await axios.delete(`/api/events/${eventId}`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      toast.success("Local Event removed successfully.");
+      setEventsList((prev) => prev.filter((e) => e.id !== eventId && e._id !== eventId));
+    } catch (err) {
+      toast.error(err.response?.data?.error || "Failed to remove local event.");
+    }
+  };
 
   const categories = [
     "All",
@@ -274,14 +311,14 @@ export function LocalEvents() {
     "Utsav & Shows",
   ];
 
-  const filteredEvents = LOCAL_EVENTS_DATA.filter((evt) => {
+  const filteredEvents = eventsList.filter((evt) => {
     const matchesCategory =
       selectedCategory === "All" || evt.category === selectedCategory;
     const matchesSearch =
-      evt.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      evt.titleHi.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      evt.venue.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      evt.organizer.toLowerCase().includes(searchTerm.toLowerCase());
+      (evt.title || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (evt.titleHi || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (evt.venue || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (evt.organizer || "").toLowerCase().includes(searchTerm.toLowerCase());
     return matchesCategory && matchesSearch;
   });
 
@@ -294,6 +331,10 @@ export function LocalEvents() {
     } else {
       toast.success("Event shared!");
     }
+  };
+
+  const handleOpenAddModal = () => {
+    setShowAddModal(true);
   };
 
   return (
@@ -309,10 +350,17 @@ export function LocalEvents() {
           >
             Local Devotional Programs Near Mahakal
           </h1>
-          <p className="text-light opacity-80 max-w-2xl mx-auto fs-6">
+          <p className="text-light opacity-80 max-w-2xl mx-auto fs-6 mb-4">
             Discover Harikathas, Bhajan Sandhyas, Shipra Aartis, Annakshetra
             Bhandaras, and Satsangs happening around Shri Mahakaleshwar Temple.
           </p>
+
+          <button
+            onClick={handleOpenAddModal}
+            className={`btn ${styles.goldBtn} rounded-pill px-4 py-2.5 d-inline-flex align-items-center gap-2 fw-bold shadow-lg`}
+          >
+            <Sparkles size={18} /> ✨ Post New Local Event
+          </button>
         </div>
 
         {/* Search & Category Filter Section */}
@@ -490,7 +538,7 @@ export function LocalEvents() {
                       {/* Key Highlights */}
                       <div className="mb-3">
                         <div className="d-flex flex-column gap-1.5">
-                          {evt.highlights.slice(0, 2).map((hl, idx) => (
+                          {(Array.isArray(evt.highlights) ? evt.highlights : []).slice(0, 2).map((hl, idx) => (
                             <div
                               key={idx}
                               className="d-flex align-items-start gap-2 text-light opacity-90 small"
@@ -532,13 +580,13 @@ export function LocalEvents() {
                         {/* Action Buttons Stack */}
                         <div className="d-flex flex-column gap-2">
                           <a
-                            href={`tel:${evt.phone.replace(/\s+/g, "")}`}
+                            href={`tel:${(evt.phone || "").replace(/\s+/g, "")}`}
                             className="btn btn-warning text-dark fw-bold btn-sm rounded-pill py-2.5 d-flex align-items-center justify-content-center gap-2 shadow-sm transition-all hover-scale"
                             style={{ fontSize: "0.86rem" }}
-                            title={`Call ${evt.contactPerson}`}
+                            title={`Call ${evt.contactPerson || "Organizer"}`}
                           >
                             <Phone size={15} />
-                            <span>Call {evt.phone}</span>
+                            <span>Call {evt.phone || "Contact Organizer"}</span>
                           </a>
 
                           <button
@@ -549,6 +597,17 @@ export function LocalEvents() {
                             <Info size={15} />
                             <span>Full Program Schedule</span>
                           </button>
+
+                          {((user && (evt.creatorUserId === user.id || evt.creatorEmail === user.email)) || (user && ["official", "admin"].includes(user.role))) && (
+                            <button
+                              onClick={() => handleDeleteEvent(evt.id || evt._id)}
+                              className="btn btn-outline-danger btn-sm rounded-pill py-1.5 d-flex align-items-center justify-content-center gap-1.5 mt-1"
+                              style={{ fontSize: "0.8rem" }}
+                            >
+                              <Trash2 size={14} />
+                              <span>Remove My Event</span>
+                            </button>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -669,7 +728,7 @@ export function LocalEvents() {
                       Key Highlights for Devotees
                     </h5>
                     <div className="row g-2 mb-4">
-                      {activeModalEvent.highlights.map((hl, idx) => (
+                      {(Array.isArray(activeModalEvent.highlights) ? activeModalEvent.highlights : []).map((hl, idx) => (
                         <div
                           key={idx}
                           className="col-md-6 d-flex align-items-start gap-2 text-light small"
@@ -735,6 +794,15 @@ export function LocalEvents() {
             </div>
           )}
         </AnimatePresence>
+
+        <AddLocalEventModal
+          isOpen={showAddModal}
+          onClose={() => setShowAddModal(false)}
+          onEventAdded={(newEvent) => {
+            setEventsList((prev) => [newEvent, ...prev]);
+          }}
+          user={user}
+        />
       </div>
     </div>
   );

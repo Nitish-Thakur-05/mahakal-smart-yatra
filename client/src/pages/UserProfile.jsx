@@ -553,7 +553,10 @@ export function UserProfile({ user, onOpenAuth, onUpdateUser }) {
                   </span>
                   <h3
                     className={`fw-bold mb-1 ${styles.playfairFont} hotel-overlay-title`}
-                    style={{ color: "#ffffff", textShadow: "0 2px 10px rgba(0,0,0,0.9)" }}
+                    style={{
+                      color: "#ffffff",
+                      textShadow: "0 2px 10px rgba(0,0,0,0.9)",
+                    }}
                   >
                     {user.hotelName || `${user.name}'s Hotel`}
                   </h3>

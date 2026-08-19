@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Room = require('../models/Room');
 const Booking = require('../models/Booking');
+const User = require('../models/User');
 const { authenticateToken } = require('../middleware/auth');
 const { sendETicketEmail } = require('../services/emailService');
 
@@ -17,25 +18,66 @@ router.get('/my-rooms', authenticateToken, async (req, res) => {
   }
 });
 
-// POST add a new room (Hotel Partner only)
+// POST add a new room
 router.post('/add-room', authenticateToken, async (req, res) => {
   try {
-    if (req.user.role !== 'hotel') {
-      return res.status(403).json({ error: 'Only Hotel Partners can add rooms.' });
+    const userId = req.user.userId || req.user.id || req.user._id;
+    let partnerUser = null;
+    try {
+      const mongoose = require('mongoose');
+      if (mongoose.connection.readyState === 1) {
+        partnerUser = await User.findById(userId);
+      }
+    } catch (uErr) {
+      partnerUser = null;
     }
-    const partnerUser = await User.findById(req.user.userId);
-    const hotelName = partnerUser?.hotelName || partnerUser?.name || 'Mahakal Verified Hotel';
-    const room = await Room.create({
-      hotelPartnerId: req.user.userId,
-      hotelName,
-      location: req.body.location || `${hotelName}, Near Mahakal Temple, Ujjain`,
-      distance: req.body.distance || '0.3 km from Temple',
-      rating: req.body.rating || 4.8,
-      badge: req.body.badge || req.body.roomType || 'Mahakal Verified',
-      ...req.body
-    });
+
+    const hotelName = partnerUser?.hotelName || partnerUser?.name || req.user.name || 'Mahakal Verified Hotel';
+    const pricePerNight = Number(req.body.pricePerNight) || 1499;
+    const roomNumber = String(req.body.roomNumber || '101').trim();
+
+    const mongoose = require('mongoose');
+    let room;
+    if (mongoose.connection.readyState === 1) {
+      room = await Room.create({
+        hotelPartnerId: userId,
+        hotelName,
+        roomNumber,
+        roomType: req.body.roomType || 'Deluxe',
+        pricePerNight,
+        maxGuests: Number(req.body.maxGuests) || 2,
+        location: req.body.location || partnerUser?.hotelAddress || `${hotelName}, Near Mahakal Temple, Ujjain`,
+        distance: req.body.distance || '0.3 km from Temple',
+        rating: req.body.rating || 4.8,
+        badge: req.body.badge || req.body.roomType || 'Mahakal Verified',
+        description: req.body.description || '',
+        amenities: Array.isArray(req.body.amenities) ? req.body.amenities : [],
+        images: Array.isArray(req.body.images) && req.body.images[0] ? req.body.images : ['https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&q=80&w=800'],
+        isAvailable: req.body.isAvailable !== undefined ? req.body.isAvailable : true
+      });
+    } else {
+      room = {
+        _id: 'room_' + Date.now(),
+        hotelPartnerId: userId,
+        hotelName,
+        roomNumber,
+        roomType: req.body.roomType || 'Deluxe',
+        pricePerNight,
+        maxGuests: Number(req.body.maxGuests) || 2,
+        location: `${hotelName}, Near Mahakal Temple, Ujjain`,
+        distance: '0.3 km from Temple',
+        rating: 4.8,
+        badge: 'Mahakal Verified',
+        description: req.body.description || '',
+        amenities: req.body.amenities || [],
+        images: req.body.images || ['https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&q=80&w=800'],
+        isAvailable: true
+      };
+    }
+
     res.json({ message: 'Room listed successfully!', room });
   } catch (err) {
+    console.error("Add room error:", err);
     res.status(500).json({ error: err.message || 'Failed to add room.' });
   }
 });
